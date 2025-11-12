@@ -53,3 +53,16 @@ Esta plataforma foi projetada para digitalizar a gestão de grupos de networking
 | **SQLite**             | Banco de dados relacional leve.               | Uso para a prototipagem deste Teste Técnico, o próprio Drizzle está sendo integrado à este para fácil migração para bancos relacionais mais recomendados, como PostgreSQL ou MySQL/MariaDB.                |
 | **JWT (jsonwebtoken)** | Implementação de autenticação stateless.      | Facilita a autenticação distribuída, dispensando sessão persistente no servidor.                        |
 | **bcrypt**             | Biblioteca para hash e verificação de senhas. | Garante segurança ao armazenar senhas de forma criptograficamente segura.                              
+
+---
+
+### 🧪 **Testes**
+
+| Tecnologia                    | Resumo                                                   | Justificativa                                                              |
+| ----------------------------- | -------------------------------------------------------- | -------------------------------------------------------------------------- |
+| **Jest**                      | Framework completo de testes para JavaScript/TypeScript. | Fornece ambiente unificado para testes unitários e de integração.          |
+| **React Testing Library**     | Utilitário para testes de componentes React.             | Foca no comportamento do usuário final, com testes de render e user actions. |
+| **MSW (Mock Service Worker)** | Mock de requisições HTTP e interceptador de APIs.        | Permite testar o frontend sem depender de um backend real.                 |
+| **Supertest**                 | Biblioteca para testar endpoints HTTP.                   | Ideal para validar APIs criadas com Next.js ou Express.                    |
+
+---
