@@ -4,7 +4,7 @@
 
 1. [Visão Geral](#visão-geral)
 2. [Diagrama da Arquitetura](#diagrama-da-arquitetura)
-3. [Stack Tecnológica](#-stack-tecnológica)
+3. [Stack Tecnológica](#stack-tecnológica)
 
 ---
 
