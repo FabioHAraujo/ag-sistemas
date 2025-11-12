@@ -24,3 +24,9 @@ Esta plataforma foi projetada para digitalizar a gestão de grupos de networking
 ## Diagrama da Arquitetura
 
 ![Diagrama de Arquitetura](./docs/esquema-mermaid.svg)
+
+### Fluxo de Dados Simplificado
+
+![Fluxo de Dados](./docs/fluxo-de-dados.svg)
+
+---
