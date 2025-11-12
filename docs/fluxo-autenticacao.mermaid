@@ -1,0 +1,19 @@
+sequenceDiagram
+    participant User
+    participant Frontend
+    participant API
+    participant DB
+    
+    User->>Frontend: Login (email, password)
+    Frontend->>API: POST /api/auth/login
+    API->>DB: Verificar credenciais
+    DB-->>API: Usuário válido
+    API->>API: Gerar JWT
+    API-->>Frontend: Set httpOnly cookie + user data
+    Frontend-->>User: Redirecionar para dashboard
+    
+    User->>Frontend: Acessar rota protegida
+    Frontend->>API: Request com cookie
+    API->>API: Validar JWT
+    API-->>Frontend: Dados autorizados
+    Frontend-->>User: Exibir conteúdo

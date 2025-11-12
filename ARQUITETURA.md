@@ -8,6 +8,7 @@
 4. [Modelo de Dados (Prisma ORM)](#modelo-de-dados-prisma-orm)
 5. [Estrutura de Componentes (Frontend)](#estrutura-de-componentes-frontend)
 6. [Definição da API](#definição-da-api)
+7. [Autenticação e Autorização](#autenticação-e-autorização)
 
 ---
 
@@ -593,5 +594,35 @@ Todas as rotas seguem o padrão REST, retornam JSON e utilizam autenticação JW
 | **GET** | `/api/dashboard/stats` | Retorna estatísticas e KPIs |
 | **GET** | `/api/payments` | Lista pagamentos com filtros (admin) |
 | **PATCH** | `/api/payments/:id` | Atualiza status de pagamento (admin) |
+
+---
+
+## Autenticação e Autorização
+
+### Fluxo de Autenticação
+
+![Fluxo de Autenticação](./docs/fluxo-autenticacao.svg)
+
+### Estratégia
+
+- **JWT (JSON Web Tokens)** armazenados em httpOnly cookies
+- Token válido por 24 horas
+- Payload: `{ sub, email, role, iat, exp }`
+- Middleware de autenticação em `lib/auth.ts`
+- Middleware Next.js para proteção de rotas
+
+### Níveis de Acesso
+
+| Papel | Permissões |
+|-------|-----------|
+| **Admin** | Acesso total ao sistema + aprovação de intenções |
+| **Member** | Dashboard, perfil, indicações, agradecimentos, reuniões |
+| **Público** | Apenas `/apply` e `/login` |
+
+### Fluxo de Autenticação
+
+1. Login → Validação de credenciais → Geração de JWT → Cookie httpOnly
+2. Requisições → Validação de token → Verificação de role → Autorização
+3. Rotas protegidas via `middleware.ts` (redirecionamento automático)
 
 ---
