@@ -9,6 +9,8 @@
 5. [Estrutura de Componentes (Frontend)](#estrutura-de-componentes-frontend)
 6. [Definição da API](#definição-da-api)
 7. [Autenticação e Autorização](#autenticação-e-autorização)
+8. [Fluxos Principais](#fluxos-principais)
+9. [Considerações de Segurança](#considerações-de-segurança)
 
 ---
 
@@ -640,3 +642,26 @@ Todas as rotas seguem o padrão REST, retornam JSON e utilizam autenticação JW
 ### 3. Fluxo de Check-in em Reuniões
 
 ![Fluxo de Check-in em Reuniões](./docs/fluxo-checkin-reuniao.svg)
+
+---
+
+## Considerações de Segurança
+
+### Principais Medidas Implementadas
+
+| Área | Medidas |
+|------|---------|
+| **Autenticação** | Bcrypt (12 rounds), JWT 24h, httpOnly cookies, rate limiting |
+| **Autorização** | Middleware de roles, validação de ownership, segregação de rotas |
+| **Validação** | Zod schemas (frontend + backend), sanitização via Prisma ORM |
+| **API** | CORS configurado, rate limiting, headers de segurança, logs de tentativas suspeitas |
+| **Dados Sensíveis** | Secrets em env vars, HTTPS obrigatório em produção, PII protegido |
+| **CSRF** | SameSite cookies, tokens em formulários críticos |
+
+### Tokens de Registro
+
+- Expiração em 7 dias após aprovação
+- Uso único (invalidado após cadastro)
+- Secrets diferentes para dev/staging/prod
+
+---
