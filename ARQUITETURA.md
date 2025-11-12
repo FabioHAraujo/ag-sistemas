@@ -43,3 +43,13 @@ Esta plataforma foi projetada para digitalizar a gestão de grupos de networking
 | **Zod**             | Biblioteca de validação de schemas e tipagem runtime.                                                           | Garante integridade de dados e validação alinhada com os tipos TypeScript.                                                |
 
 ---
+
+### ⚙️ **Backend**
+
+| Tecnologia             | Resumo                                        | Justificativa                                                                                           |
+| ---------------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| **Next.js API Routes** | Rotas de API integradas ao framework Next.js. | Permite implementar endpoints REST diretamente no mesmo projeto, simplificando o deploy e a integração. |
+| **Drizzle ORM**        | ORM moderno “TypeScript-first”.               | Oferece tipagem completa, migrações seguras e performance elevada, mantendo controle direto sobre SQL, além de oferecer melhor desempenho em consultas quando comparado com o Prisma ORM. |
+| **SQLite**             | Banco de dados relacional leve.               | Uso para a prototipagem deste Teste Técnico, o próprio Drizzle está sendo integrado à este para fácil migração para bancos relacionais mais recomendados, como PostgreSQL ou MySQL/MariaDB.                |
+| **JWT (jsonwebtoken)** | Implementação de autenticação stateless.      | Facilita a autenticação distribuída, dispensando sessão persistente no servidor.                        |
+| **bcrypt**             | Biblioteca para hash e verificação de senhas. | Garante segurança ao armazenar senhas de forma criptograficamente segura.                              
