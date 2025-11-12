@@ -6,6 +6,7 @@
 2. [Diagrama da Arquitetura](#diagrama-da-arquitetura)
 3. [Stack Tecnológica](#stack-tecnológica)
 4. [Modelo de Dados (Prisma ORM)](#modelo-de-dados-prisma-orm)
+5. [Estrutura de Componentes (Frontend)](#estrutura-de-componentes-frontend)
 
 ---
 
@@ -501,3 +502,66 @@ model Payment {
 
 ---
 
+## Estrutura de Componentes (Frontend)
+
+### Organização de Diretórios
+
+```
+src/
+├── app/
+│   ├── (public)/               → /apply, /login
+│   ├── (private)/              → /admin, /dashboard, /members, /referrals
+│   ├── api/                    → Rotas integradas do backend (auth, applications, etc)
+│   ├── layout.tsx              → Layout global da aplicação
+│   └── globals.css             → Estilos globais com Tailwind
+│
+├── components/
+│   ├── ui/                     → Componentes base do Shadcn (Button, Input, Card, Badge, etc)
+│   └── features/               → Componentes específicos de funcionalidades
+│       ├── ApplicationForm.tsx
+│       ├── AdminReviewTable.tsx
+│       ├── MemberProfile.tsx
+│       ├── ReferralCard.tsx
+│       ├── DashboardStats.tsx
+│       └── ...
+│
+├── lib/
+│   ├── prisma.ts               → Cliente Prisma singleton
+│   ├── auth.ts                 → Funções de autenticação JWT
+│   ├── mailer.ts               → Serviço de envio de e-mail
+│   ├── validators.ts           → Schemas Zod para validação
+│   └── utils.ts                → Utilitários gerais (formatação, etc)
+│
+├── scripts/
+│   ├── seed.ts                 → Popular banco com dados de teste
+│   └── create-admin.ts         → Criar usuário admin inicial
+│
+└── prisma/
+    ├── schema.prisma           → Schema do banco de dados
+    └── migrations/             → Histórico de migrações
+```
+
+### Estratégia de Componentização
+
+**Componentes UI (Shadcn)**
+- Componentes reutilizáveis e acessíveis
+- Estilizados com Tailwind CSS
+- Totalmente customizáveis
+
+**Componentes Features**
+- Específicos para cada módulo do sistema
+- Compostos por componentes UI
+- Contêm lógica de negócio da interface
+
+**Padrão de Organização**
+- Rotas públicas e privadas separadas por route groups
+- API Routes co-localizadas no diretório `app/api/`
+- Server Components por padrão, Client Components quando necessário
+
+**Estratégia de Estado**
+- React useState/useReducer para estado local
+- React Hook Form para formulários
+- Next.js cache nativo para dados de servidor
+- Context API + JWT cookies para autenticação
+
+---
