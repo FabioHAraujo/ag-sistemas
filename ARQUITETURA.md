@@ -665,3 +665,80 @@ Todas as rotas seguem o padrão REST, retornam JSON e utilizam autenticação JW
 - Secrets diferentes para dev/staging/prod
 
 ---
+
+## ⚡ Escalabilidade e Performance
+
+### Estratégias Implementadas
+
+| Área | Otimizações |
+|------|-------------|
+| **Database** | Índices estratégicos, paginação, Prisma prepared statements |
+| **Caching** | Next.js cache nativo, `revalidatePath()`, ISR para páginas públicas |
+| **Frontend** | Code splitting automático, lazy loading, next/image, next/font |
+| **API** | Queries paralelas, validação compilada (Zod), evitar N+1 |
+| **Monitoramento** | Vercel Analytics, Sentry, logs estruturados |
+| **Scaling** | Stateless JWT, connection pooling, CDN-ready |
+
+### Migração SQLite → PostgreSQL
+
+```bash
+# 1. Atualizar provider no schema.prisma (sqlite → postgresql)
+# 2. Atualizar DATABASE_URL no .env
+# 3. Criar migrations iniciais no novo banco
+npx prisma migrate dev --name init
+# 4. Migrar dados manualmente (dump/import ou script custom)
+```
+
+---
+
+## 🚀 Próximos Passos para Implementação
+
+### Fase 1: Setup (Dia 1)
+- [x] Projeto Next.js configurado
+- [ ] Prisma ORM + SQLite
+- [ ] TailwindCSS 4 + Shadcn/ui
+- [ ] Jest + React Testing Library
+- [ ] Variáveis de ambiente
+
+### Fase 2: Autenticação (Dia 1-2)
+- [ ] Schema de usuários (Prisma)
+- [ ] API Routes: login, register, me
+- [ ] Middleware JWT
+- [ ] Proteção de rotas
+- [ ] Testes de autenticação
+
+### Fase 3: Fluxo de Admissão (Dia 2-3)
+- [ ] Schema de applications
+- [ ] Formulário público de intenção
+- [ ] Área admin de revisão
+- [ ] Aprovação/rejeição + geração de tokens
+- [ ] Serviço de e-mail (console mock)
+- [ ] Página de cadastro completo
+- [ ] Testes E2E do fluxo
+
+### Fase 4: Dashboard Mockado (Dia 3-4)
+- [ ] Componentes de estatísticas
+- [ ] Gráficos com dados mock
+- [ ] API `/api/dashboard/stats`
+- [ ] Layout responsivo
+
+### Fase 5: Refinamento (Dia 4-5)
+- [ ] Validações Zod completas
+- [ ] Tratamento de erros
+- [ ] UX/UI polish
+- [ ] Testes de integração
+- [ ] Documentação README
+
+---
+
+## ✅ Conclusão
+
+Esta arquitetura foi projetada para ser:
+
+- **Escalável**: Migração trivial SQLite → PostgreSQL/MySQL com Prisma
+- **Manutenível**: TypeScript end-to-end, separação clara de responsabilidades
+- **Testável**: Componentes isolados, MSW para mocks, cobertura de testes
+- **Performática**: Caching estratégico, queries otimizadas, code splitting
+- **Segura**: JWT httpOnly, validação em camadas, proteção contra vulnerabilidades comuns
+
+---
