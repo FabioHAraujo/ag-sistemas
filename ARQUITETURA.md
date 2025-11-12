@@ -511,7 +511,6 @@ model Payment {
 ### Organização de Diretórios
 
 ```
-src/
 ├── app/
 │   ├── (public)/               → /apply, /login
 │   ├── (private)/              → /admin, /dashboard, /members, /referrals
@@ -535,6 +534,17 @@ src/
 │   ├── mailer.ts               → Serviço de envio de e-mail
 │   ├── validators.ts           → Schemas Zod para validação
 │   └── utils.ts                → Utilitários gerais (formatação, etc)
+│
+├── __tests__/                  → Testes organizados por tipo
+│   ├── unit/                   → Testes unitários (funções, utils)
+│   ├── integration/            → Testes de integração (API routes)
+│   ├── components/             → Testes de componentes React
+│   └── e2e/                    → Testes end-to-end (fluxos completos)
+│
+├── __mocks__/                  → Mocks globais para testes
+│   ├── prisma.ts               → Mock do Prisma Client
+│   ├── next-auth.ts            → Mock de autenticação
+│   └── handlers.ts             → MSW handlers para API
 │
 ├── scripts/
 │   ├── seed.ts                 → Popular banco com dados de teste
