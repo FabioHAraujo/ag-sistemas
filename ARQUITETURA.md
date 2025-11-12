@@ -567,7 +567,7 @@ src/
 
 ---
 
-## 🔌 Definição da API
+## Definição da API
 
 Todas as rotas seguem o padrão REST, retornam JSON e utilizam autenticação JWT via header `Authorization: Bearer {token}` (exceto rotas públicas).
 
