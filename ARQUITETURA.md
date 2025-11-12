@@ -693,12 +693,12 @@ npx prisma migrate dev --name init
 
 ## 🚀 Próximos Passos para Implementação
 
-### Fase 1: Setup (Dia 1)
+### Fase 1: Setup (Dia 1) ✅
 - [x] Projeto Next.js configurado
-- [ ] Prisma ORM + SQLite
-- [ ] TailwindCSS 4 + Shadcn/ui
-- [ ] Jest + React Testing Library
-- [ ] Variáveis de ambiente
+- [x] Prisma ORM + SQLite
+- [x] TailwindCSS 4 + Shadcn/ui
+- [x] Jest + React Testing Library
+- [x] Variáveis de ambiente
 
 ### Fase 2: Autenticação (Dia 1-2)
 - [ ] Schema de usuários (Prisma)

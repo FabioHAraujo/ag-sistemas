@@ -1,0 +1,57 @@
+// This is your Prisma schema file
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  MEMBER
+}
+
+enum ApplicationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  name         String
+  role         Role     @default(MEMBER)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  reviewedApplications Application[] @relation("ApplicationReviewer")
+
+  @@index([email])
+  @@map("users")
+}
+
+model Application {
+  id             String            @id @default(uuid())
+  name           String
+  email          String
+  company        String
+  motivation     String
+  status         ApplicationStatus @default(PENDING)
+  reviewedBy     String?           @map("reviewed_by")
+  reviewedAt     DateTime?         @map("reviewed_at")
+  token          String?           @unique
+  tokenExpiresAt DateTime?         @map("token_expires_at")
+  createdAt      DateTime          @default(now()) @map("created_at")
+  updatedAt      DateTime          @updatedAt @map("updated_at")
+
+  reviewer User? @relation("ApplicationReviewer", fields: [reviewedBy], references: [id])
+
+  @@index([status])
+  @@index([email])
+  @@map("applications")
+}

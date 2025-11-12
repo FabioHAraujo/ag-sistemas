@@ -44,3 +44,9 @@ next-env.d.ts
 # Documento do teste e minhas anotações
 teste-tecnico.pdf
 teste-tecnico.txt
+/lib/generated/prisma
+
+/lib/generated/prisma
+
+# Environment variables
+.env.local
