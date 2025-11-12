@@ -1,0 +1,33 @@
+flowchart TD
+    A[Candidato acessa /apply] --> B[Preenche formulário de intenção]
+    B --> C[Submete aplicação]
+    C --> D[Aplicação salva com status 'pending']
+    D --> E[Notificação enviada ao admin]
+    
+    E --> F[Admin acessa /admin/applications]
+    F --> G{Revisar aplicação}
+    
+    G -->|Aprovar| H[Status = 'approved']
+    G -->|Rejeitar| I[Status = 'rejected']
+    
+    H --> J[Gerar token único]
+    J --> K[Salvar token com expiração 7 dias]
+    K --> L[Enviar e-mail com link de cadastro]
+    L --> M[Log do link em console]
+    
+    M --> N[Candidato clica no link]
+    N --> O[Acessa /register/token]
+    O --> P{Token válido?}
+    
+    P -->|Sim| Q[Exibe formulário completo]
+    P -->|Não| R[Mensagem de erro/expirado]
+    
+    Q --> S[Preenche dados completos]
+    S --> T[Submete cadastro]
+    T --> U[Criar usuário + senha hash]
+    U --> V[Criar perfil completo]
+    V --> W[Criar membership ativo]
+    W --> X[Login automático]
+    X --> Y[Redirecionar para /dashboard]
+    
+    I --> Z[Enviar e-mail de recusa]

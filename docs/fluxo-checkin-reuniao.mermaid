@@ -1,0 +1,17 @@
+flowchart TD
+    A[Admin cria reunião] --> B[Reunião salva com status 'scheduled']
+    B --> C[Notificar todos os membros]
+    
+    C --> D[Data da reunião chega]
+    D --> E[Admin marca reunião como 'ongoing']
+    
+    E --> F[Membros acessam /meetings/id]
+    F --> G[QR Code ou botão de check-in]
+    G --> H[Membro faz check-in]
+    H --> I[Attendance salva com status 'present']
+    I --> J[Timestamp de check-in]
+    
+    J --> K[Reunião termina]
+    K --> L[Admin marca como 'completed']
+    L --> M[Calcular taxa de presença]
+    M --> N[Atualizar estatísticas]

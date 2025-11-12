@@ -1,0 +1,25 @@
+flowchart TD
+    A[Membro acessa /referrals/new] --> B[Seleciona membro destinatário]
+    B --> C[Preenche dados da indicação]
+    C --> D[Submete indicação]
+    D --> E[Salvar com status 'sent']
+    E --> F[Notificar membro destinatário]
+    
+    F --> G[Destinatário acessa /referrals]
+    G --> H[Visualiza indicações recebidas]
+    H --> I[Contata o lead]
+    I --> J{Atualizar status}
+    
+    J -->|Em contato| K[Status = 'contacted']
+    J -->|Negociando| L[Status = 'negotiating']
+    J -->|Fechado| M[Status = 'closed_won']
+    J -->|Perdido| N[Status = 'closed_lost']
+    
+    M --> O[Registrar valor fechado]
+    O --> P[Atualizar estatísticas]
+    P --> Q[Criar 'thank you' público]
+    Q --> R[Notificar membro origem]
+    
+    K --> S[Histórico de atualizações]
+    L --> S
+    N --> S

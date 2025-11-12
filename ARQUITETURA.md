@@ -626,3 +626,17 @@ Todas as rotas seguem o padrão REST, retornam JSON e utilizam autenticação JW
 3. Rotas protegidas via `middleware.ts` (redirecionamento automático)
 
 ---
+
+## Fluxos Principais
+
+### 1. Fluxo de Admissão de Membros
+
+![Fluxo de Admissão de Membros](./docs/fluxo-admissao-membros.svg)
+
+### 2. Fluxo de Indicações de Negócios
+
+![Fluxo de Indicações de Negócios](./docs/fluxo-indicacao-negocios.svg)
+
+### 3. Fluxo de Check-in em Reuniões
+
+![Fluxo de Check-in em Reuniões](./docs/fluxo-checkin-reuniao.svg)
