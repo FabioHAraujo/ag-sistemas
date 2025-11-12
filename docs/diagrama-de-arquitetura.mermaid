@@ -1,0 +1,44 @@
+flowchart TB
+ subgraph subGraph0["Cliente (Navegador)"]
+        UI["Interface React/Next.js"]
+        CSR["Renderização no Lado do Cliente - CSR"]
+        SSR["Renderização no Lado do Servidor - SSR"]
+  end
+ subgraph subGraph1["Camada de Serviços"]
+        AuthService["Serviço de Autenticação"]
+        MemberService["Serviço de Membro"]
+        ReferralService["Serviço de Indicações"]
+        FinancialService["Serviço Financeiro"]
+        NotificationService["Serviço de Notificação"]
+  end
+ subgraph subGraph2["Servidor da Aplicação Next.js"]
+        Pages["Páginas e Layouts"]
+        APIRoutes["Rotas de API"]
+        Middleware["Middleware - Autenticação/CORS"]
+        subGraph1
+  end
+ subgraph subGraph3["Camada de Dados"]
+        Drizzle["Drizzle ORM"]
+        SQLite["Banco de Dados SQLite"]
+  end
+ subgraph subGraph4["Serviços Externos"]
+        SMTP["Servidor SMTP"]
+        Console["Console Logger"]
+  end
+    UI --> Pages & APIRoutes
+    Pages --> SSR
+    SSR --> Drizzle
+    APIRoutes --> Middleware
+    Middleware --> AuthService & MemberService & ReferralService & FinancialService & NotificationService
+    AuthService --> Drizzle
+    MemberService --> Drizzle
+    ReferralService --> Drizzle
+    FinancialService --> Drizzle
+    NotificationService --> SMTP & Console
+    Drizzle --> SQLite
+
+    style UI fill:#BBDEFB
+    style APIRoutes fill:#E1BEE7
+    style SQLite fill:#00C853
+
+
