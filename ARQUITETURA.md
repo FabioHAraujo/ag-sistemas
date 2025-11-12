@@ -7,6 +7,7 @@
 3. [Stack Tecnológica](#stack-tecnológica)
 4. [Modelo de Dados (Prisma ORM)](#modelo-de-dados-prisma-orm)
 5. [Estrutura de Componentes (Frontend)](#estrutura-de-componentes-frontend)
+6. [Definição da API](#definição-da-api)
 
 ---
 
@@ -563,5 +564,34 @@ src/
 - React Hook Form para formulários
 - Next.js cache nativo para dados de servidor
 - Context API + JWT cookies para autenticação
+
+---
+
+## 🔌 Definição da API
+
+Todas as rotas seguem o padrão REST, retornam JSON e utilizam autenticação JWT via header `Authorization: Bearer {token}` (exceto rotas públicas).
+
+### 🔌 Endpoints Principais
+
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| **POST** | `/api/auth/login` | Realiza login e retorna JWT |
+| **POST** | `/api/auth/register` | Cadastra novo membro com token de convite |
+| **GET** | `/api/auth/me` | Retorna dados do usuário autenticado |
+| **POST** | `/api/applications` | Cria intenção de participação (público) |
+| **GET** | `/api/applications` | Lista intenções pendentes (admin) |
+| **POST** | `/api/applications/:id/approve` | Aprova e gera link de cadastro (admin) |
+| **POST** | `/api/applications/:id/reject` | Rejeita intenção (admin) |
+| **POST** | `/api/referrals` | Cria nova indicação |
+| **GET** | `/api/referrals` | Lista indicações enviadas/recebidas |
+| **PATCH** | `/api/referrals/:id/status` | Atualiza status da indicação |
+| **GET** | `/api/members` | Lista membros com filtros |
+| **GET** | `/api/members/:id` | Detalha membro e estatísticas |
+| **POST** | `/api/meetings` | Cria reunião (admin) |
+| **POST** | `/api/meetings/:id/attendance` | Registra presença em reunião |
+| **GET** | `/api/announcements` | Lista avisos publicados |
+| **GET** | `/api/dashboard/stats` | Retorna estatísticas e KPIs |
+| **GET** | `/api/payments` | Lista pagamentos com filtros (admin) |
+| **PATCH** | `/api/payments/:id` | Atualiza status de pagamento (admin) |
 
 ---
