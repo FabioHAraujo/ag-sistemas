@@ -66,3 +66,13 @@ Esta plataforma foi projetada para digitalizar a gestão de grupos de networking
 | **Supertest**                 | Biblioteca para testar endpoints HTTP.                   | Ideal para validar APIs criadas com Next.js ou Express.                    |
 
 ---
+
+### 🛠️ **Ferramentas**
+
+| Tecnologia      | Resumo                                              | Justificativa                                                                          |
+| --------------- | --------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| **Biome**       | Linter e formatador all-in-one ultrarrápido (escrito em Rust). | Substitui ESLint + Prettier com performance superior (até 25x mais rápido), configuração zero/mínima e menor footprint de dependências. Suporta JavaScript, TypeScript, JSON e JSX/TSX. |
+| **Husky**       | Executor de Git hooks.                              | Automatiza checagens antes de commits/push, prevenindo código quebrado no repositório. |
+| **Lint-staged** | Executa validações apenas nos arquivos modificados. | Otimiza o tempo de execução dos hooks, focando apenas em códigos alterados, tornando o fluxo de commits mais ágil.          |
+
+---
