@@ -5,6 +5,7 @@
 1. [Visão Geral](#visão-geral)
 2. [Diagrama da Arquitetura](#diagrama-da-arquitetura)
 3. [Stack Tecnológica](#stack-tecnológica)
+4. [Modelo de Dados (Prisma ORM)](#modelo-de-dados-prisma-orm)
 
 ---
 
@@ -499,3 +500,4 @@ model Payment {
 </details>
 
 ---
+
