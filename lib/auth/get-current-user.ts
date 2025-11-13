@@ -1,5 +1,5 @@
 import { cookies, headers } from 'next/headers'
-import { verifyToken, JWTPayload } from './jwt'
+import { verifyToken } from './jwt'
 
 export interface AuthUser {
   id: string
@@ -41,7 +41,7 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
       email: payload.email,
       role: payload.role,
     }
-  } catch (error) {
+  } catch (_error) {
     return null
   }
 }
@@ -66,7 +66,7 @@ export async function getUserFromHeaders(): Promise<AuthUser | null> {
       email: userEmail,
       role: userRole as 'ADMIN' | 'MEMBER',
     }
-  } catch (error) {
+  } catch (_error) {
     return null
   }
 }

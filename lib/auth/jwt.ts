@@ -1,5 +1,5 @@
+import type { Role } from '@prisma/client'
 import jwt from 'jsonwebtoken'
-import { Role } from '@prisma/client'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-key-change-in-production'
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '24h'

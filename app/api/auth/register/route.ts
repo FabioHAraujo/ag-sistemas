@@ -1,12 +1,13 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import { hashPassword } from '@/lib/auth/password'
-import { signToken } from '@/lib/auth/jwt'
+import { type NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
+import { signToken } from '@/lib/auth/jwt'
+import { hashPassword } from '@/lib/auth/password'
+import { prisma } from '@/lib/prisma'
 
 const registerSchema = z.object({
   token: z.string().min(1, 'Token é obrigatório'),
-  password: z.string()
+  password: z
+    .string()
     .min(8, 'Senha deve ter no mínimo 8 caracteres')
     .regex(/[A-Z]/, 'Senha deve conter pelo menos uma letra maiúscula')
     .regex(/[a-z]/, 'Senha deve conter pelo menos uma letra minúscula')
@@ -23,7 +24,7 @@ const registerSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    
+
     // Validação
     const validation = registerSchema.safeParse(body)
     if (!validation.success) {
@@ -42,34 +43,22 @@ export async function POST(request: NextRequest) {
     })
 
     if (!application) {
-      return NextResponse.json(
-        { error: 'Token inválido' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Token inválido' }, { status: 400 })
     }
 
     // Verificar se já foi usado
     if (application.profile) {
-      return NextResponse.json(
-        { error: 'Token já foi utilizado' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Token já foi utilizado' }, { status: 400 })
     }
 
     // Verificar se está aprovado
     if (application.status !== 'APPROVED') {
-      return NextResponse.json(
-        { error: 'Inscrição ainda não foi aprovada' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Inscrição ainda não foi aprovada' }, { status: 400 })
     }
 
     // Verificar expiração
     if (application.tokenExpiresAt && application.tokenExpiresAt < new Date()) {
-      return NextResponse.json(
-        { error: 'Token expirado' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Token expirado' }, { status: 400 })
     }
 
     // Verificar se email já existe
@@ -78,15 +67,12 @@ export async function POST(request: NextRequest) {
     })
 
     if (existingUser) {
-      return NextResponse.json(
-        { error: 'Email já cadastrado' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Email já cadastrado' }, { status: 400 })
     }
 
     // Criar usuário e perfil em transação
     const passwordHash = await hashPassword(password)
-    
+
     const user = await prisma.$transaction(async (tx) => {
       // Criar usuário
       const newUser = await tx.user.create({
@@ -147,9 +133,6 @@ export async function POST(request: NextRequest) {
     return response
   } catch (error) {
     console.error('Register error:', error)
-    return NextResponse.json(
-      { error: 'Erro interno do servidor' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 })
   }
 }

@@ -1,23 +1,20 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
+import { type JWTPayload, verifyToken } from '@/lib/auth/jwt'
 import { prisma } from '@/lib/prisma'
-import { verifyToken } from '@/lib/auth/jwt'
 
 export async function GET(request: NextRequest) {
   try {
     // Buscar token do cookie ou header
-    const token = 
+    const token =
       request.cookies.get('auth-token')?.value ||
       request.headers.get('authorization')?.replace('Bearer ', '')
 
     if (!token) {
-      return NextResponse.json(
-        { error: 'Não autenticado' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Não autenticado' }, { status: 401 })
     }
 
     // Verificar token
-    let payload
+    let payload: JWTPayload
     try {
       payload = verifyToken(token)
     } catch (error) {
@@ -40,18 +37,12 @@ export async function GET(request: NextRequest) {
     })
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'Usuário não encontrado' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: 'Usuário não encontrado' }, { status: 404 })
     }
 
     return NextResponse.json({ user })
   } catch (error) {
     console.error('Auth me error:', error)
-    return NextResponse.json(
-      { error: 'Erro interno do servidor' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 })
   }
 }

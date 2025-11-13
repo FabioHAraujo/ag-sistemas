@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import { verifyPassword } from '@/lib/auth/password'
-import { signToken } from '@/lib/auth/jwt'
+import { type NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
+import { signToken } from '@/lib/auth/jwt'
+import { verifyPassword } from '@/lib/auth/password'
+import { prisma } from '@/lib/prisma'
 
 const loginSchema = z.object({
   email: z.string().email('Email inválido'),
@@ -12,7 +12,7 @@ const loginSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    
+
     // Validação
     const validation = loginSchema.safeParse(body)
     if (!validation.success) {
@@ -30,27 +30,18 @@ export async function POST(request: NextRequest) {
     })
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'Credenciais inválidas' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Credenciais inválidas' }, { status: 401 })
     }
 
     // Verificar senha
     const isValid = await verifyPassword(password, user.passwordHash)
     if (!isValid) {
-      return NextResponse.json(
-        { error: 'Credenciais inválidas' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Credenciais inválidas' }, { status: 401 })
     }
 
     // Verificar status do usuário
     if (user.status !== 'ACTIVE') {
-      return NextResponse.json(
-        { error: 'Usuário inativo ou suspenso' },
-        { status: 403 }
-      )
+      return NextResponse.json({ error: 'Usuário inativo ou suspenso' }, { status: 403 })
     }
 
     // Gerar token JWT
@@ -82,9 +73,6 @@ export async function POST(request: NextRequest) {
     return response
   } catch (error) {
     console.error('Login error:', error)
-    return NextResponse.json(
-      { error: 'Erro interno do servidor' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 })
   }
 }

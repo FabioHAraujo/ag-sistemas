@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { verifyToken } from '@/lib/auth/jwt'
 
 // Rotas públicas que não requerem autenticação
@@ -38,27 +38,24 @@ export function middleware(request: NextRequest) {
   }
 
   // Verificar se é rota pública
-  const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route))
+  const isPublicRoute = publicRoutes.some((route) => pathname.startsWith(route))
   if (isPublicRoute && request.method === 'POST') {
     return NextResponse.next()
   }
 
   // Verificar se é rota protegida
-  const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route))
+  const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route))
   if (!isProtectedRoute) {
     return NextResponse.next()
   }
 
   // Buscar token do cookie ou header
-  const token = 
+  const token =
     request.cookies.get('auth-token')?.value ||
     request.headers.get('authorization')?.replace('Bearer ', '')
 
   if (!token) {
-    return NextResponse.json(
-      { error: 'Não autenticado' },
-      { status: 401 }
-    )
+    return NextResponse.json({ error: 'Não autenticado' }, { status: 401 })
   }
 
   // Verificar token
@@ -70,7 +67,7 @@ export function middleware(request: NextRequest) {
     // vamos confiar no token. O status é verificado no login.
 
     // Verificar se rota requer ADMIN
-    const isAdminRoute = adminRoutes.some(route => pathname.startsWith(route))
+    const isAdminRoute = adminRoutes.some((route) => pathname.startsWith(route))
     if (isAdminRoute && request.method !== 'GET' && payload.role !== 'ADMIN') {
       return NextResponse.json(
         { error: 'Acesso negado. Requer permissões de administrador.' },
