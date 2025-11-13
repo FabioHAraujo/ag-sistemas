@@ -1,17 +1,16 @@
-import { vi } from 'vitest'
-
-export const useRouter = vi.fn(() => ({
-  push: vi.fn(),
-  replace: vi.fn(),
-  prefetch: vi.fn(),
-  back: vi.fn(),
+// Mock para Jest (não Vitest)
+export const useRouter = jest.fn(() => ({
+  push: jest.fn(),
+  replace: jest.fn(),
+  prefetch: jest.fn(),
+  back: jest.fn(),
   pathname: '/',
   query: {},
   asPath: '/',
 }))
 
-export const useSearchParams = vi.fn(() => ({
-  get: vi.fn(),
+export const useSearchParams = jest.fn(() => ({
+  get: jest.fn(),
 }))
 
-export const usePathname = vi.fn(() => '/')
+export const usePathname = jest.fn(() => '/')
