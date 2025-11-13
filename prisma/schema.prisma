@@ -14,6 +14,12 @@ enum Role {
   MEMBER
 }
 
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
 enum ApplicationStatus {
   PENDING
   APPROVED
@@ -21,17 +27,20 @@ enum ApplicationStatus {
 }
 
 model User {
-  id           String   @id @default(uuid())
-  email        String   @unique
-  passwordHash String   @map("password_hash")
+  id           String     @id @default(uuid())
+  email        String     @unique
+  passwordHash String     @map("password_hash")
   name         String
-  role         Role     @default(MEMBER)
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
+  role         Role       @default(MEMBER)
+  status       UserStatus @default(ACTIVE)
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
 
-  reviewedApplications Application[] @relation("ApplicationReviewer")
+  profile              MemberProfile?
+  reviewedApplications Application[]  @relation("ApplicationReviewer")
 
   @@index([email])
+  @@index([role])
   @@map("users")
 }
 
@@ -49,9 +58,33 @@ model Application {
   createdAt      DateTime          @default(now()) @map("created_at")
   updatedAt      DateTime          @updatedAt @map("updated_at")
 
-  reviewer User? @relation("ApplicationReviewer", fields: [reviewedBy], references: [id])
+  reviewer User?          @relation("ApplicationReviewer", fields: [reviewedBy], references: [id])
+  profile  MemberProfile?
 
   @@index([status])
   @@index([email])
   @@map("applications")
+}
+
+model MemberProfile {
+  id                 String    @id @default(uuid())
+  userId             String    @unique @map("user_id")
+  applicationId      String?   @unique @map("application_id")
+  phone              String?
+  company            String
+  position           String?
+  companyDescription String?   @map("company_description")
+  expertiseArea      String?   @map("expertise_area")
+  linkedinUrl        String?   @map("linkedin_url")
+  websiteUrl         String?   @map("website_url")
+  profileImageUrl    String?   @map("profile_image_url")
+  bio                String?
+  joinedAt           DateTime  @default(now()) @map("joined_at")
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
+
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  application Application? @relation(fields: [applicationId], references: [id])
+
+  @@map("member_profiles")
 }
