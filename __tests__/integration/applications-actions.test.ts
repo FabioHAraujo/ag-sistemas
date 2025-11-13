@@ -31,12 +31,12 @@ jest.mock('node:crypto', () => ({
 
 import { requireAdmin } from '@/lib/auth/get-current-user'
 
-describe('POST /api/applications/:id/approve', () => {
+describe('POST /api/applications/[id]/approve', () => {
   beforeEach(() => {
     jest.clearAllMocks()
   })
 
-  it('should approve pending application and generate token', async () => {
+  it('deve aprovar candidatura e gerar token', async () => {
     const mockApplication = {
       id: '1',
       name: 'João Silva',
@@ -83,7 +83,7 @@ describe('POST /api/applications/:id/approve', () => {
     })
   })
 
-  it('should reject approval of non-existent application', async () => {
+  it('deve rejeitar aprovação de candidatura inexistente', async () => {
     ;(requireAdmin as jest.Mock).mockResolvedValue({
       id: 'admin-1',
       email: 'admin@networking.com',
@@ -103,7 +103,7 @@ describe('POST /api/applications/:id/approve', () => {
     expect(prisma.application.update).not.toHaveBeenCalled()
   })
 
-  it('should reject approval of already processed application', async () => {
+  it('deve rejeitar aprovação de candidatura já processada', async () => {
     const mockApplication = {
       id: '1',
       status: 'APPROVED',
@@ -129,12 +129,12 @@ describe('POST /api/applications/:id/approve', () => {
   })
 })
 
-describe('POST /api/applications/:id/reject', () => {
+describe('POST /api/applications/[id]/reject', () => {
   beforeEach(() => {
     jest.clearAllMocks()
   })
 
-  it('should reject pending application', async () => {
+  it('deve rejeitar candidatura', async () => {
     const mockApplication = {
       id: '1',
       name: 'João Silva',
@@ -176,7 +176,7 @@ describe('POST /api/applications/:id/reject', () => {
     })
   })
 
-  it('should reject rejection of non-existent application', async () => {
+  it('deve rejeitar rejeição de candidatura inexistente', async () => {
     ;(requireAdmin as jest.Mock).mockResolvedValue({
       id: 'admin-1',
       email: 'admin@networking.com',
@@ -196,7 +196,7 @@ describe('POST /api/applications/:id/reject', () => {
     expect(prisma.application.update).not.toHaveBeenCalled()
   })
 
-  it('should reject rejection of already processed application', async () => {
+  it('deve rejeitar rejeição de candidatura já processada', async () => {
     const mockApplication = {
       id: '1',
       status: 'REJECTED',

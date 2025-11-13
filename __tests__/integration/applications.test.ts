@@ -20,7 +20,7 @@ describe('POST /api/applications', () => {
     jest.clearAllMocks()
   })
 
-  it('should create a new application with valid data', async () => {
+  it('deve criar uma nova candidatura com dados válidos', async () => {
     const mockApplication = {
       id: '1',
       name: 'João Silva',
@@ -59,7 +59,7 @@ describe('POST /api/applications', () => {
     })
   })
 
-  it('should reject application with invalid email', async () => {
+  it('deve rejeitar candidatura com email inválido', async () => {
     const request = new Request('http://localhost:3000/api/applications', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -78,7 +78,7 @@ describe('POST /api/applications', () => {
     expect(data.error).toContain('inválidos')
   })
 
-  it('should reject duplicate pending application with same email', async () => {
+  it('deve rejeitar candidatura duplicada pendente com o mesmo email', async () => {
     const existingApplication = {
       id: '1',
       email: 'joao@empresa.com',
@@ -106,7 +106,7 @@ describe('POST /api/applications', () => {
     expect(prisma.application.create).not.toHaveBeenCalled()
   })
 
-  it('should reject application with short motivation', async () => {
+  it('deve rejeitar candidatura com motivação curta', async () => {
     const request = new Request('http://localhost:3000/api/applications', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -125,7 +125,7 @@ describe('POST /api/applications', () => {
     expect(data.error).toContain('inválidos')
   })
 
-  it('should handle database errors gracefully', async () => {
+  it('deve tratar erros do banco de dados adequadamente', async () => {
     ;(prisma.application.findFirst as jest.Mock).mockRejectedValue(new Error('Database error'))
 
     const request = new Request('http://localhost:3000/api/applications', {

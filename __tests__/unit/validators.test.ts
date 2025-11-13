@@ -2,7 +2,7 @@ import { applicationSchema } from '@/lib/validators/application'
 import { registrationSchema } from '@/lib/validators/registration'
 
 describe('Application Validator', () => {
-  it('should validate valid application data', () => {
+  it('deve validar dados de candidatura válidos', () => {
     const validData = {
       name: 'João Silva',
       email: 'joao@empresa.com',
@@ -15,7 +15,7 @@ describe('Application Validator', () => {
     expect(result.success).toBe(true)
   })
 
-  it('should reject application with short name', () => {
+  it('deve rejeitar candidatura com nome curto', () => {
     const invalidData = {
       name: 'Jo',
       email: 'joao@empresa.com',
@@ -30,7 +30,7 @@ describe('Application Validator', () => {
     }
   })
 
-  it('should reject application with invalid email', () => {
+  it('deve rejeitar candidatura com email inválido', () => {
     const invalidData = {
       name: 'João Silva',
       email: 'email-invalido',
@@ -45,7 +45,7 @@ describe('Application Validator', () => {
     }
   })
 
-  it('should reject application with short motivation', () => {
+  it('deve rejeitar candidatura com motivação curta', () => {
     const invalidData = {
       name: 'João Silva',
       email: 'joao@empresa.com',
@@ -60,7 +60,7 @@ describe('Application Validator', () => {
     }
   })
 
-  it('should reject application with motivation too long', () => {
+  it('deve rejeitar candidatura com motivação muito longa', () => {
     const invalidData = {
       name: 'João Silva',
       email: 'joao@empresa.com',
@@ -77,7 +77,7 @@ describe('Application Validator', () => {
 })
 
 describe('Registration Validator', () => {
-  it('should validate valid registration data', () => {
+  it('deve validar dados de registro válidos', () => {
     const validData = {
       password: 'Senha@123',
       confirmPassword: 'Senha@123',
@@ -90,7 +90,7 @@ describe('Registration Validator', () => {
     expect(result.success).toBe(true)
   })
 
-  it('should reject password without uppercase', () => {
+  it('deve rejeitar senha sem letra maiúscula', () => {
     const invalidData = {
       password: 'senha@123',
       confirmPassword: 'senha@123',
@@ -105,7 +105,7 @@ describe('Registration Validator', () => {
     }
   })
 
-  it('should reject password without lowercase', () => {
+  it('deve rejeitar senha sem letra minúscula', () => {
     const invalidData = {
       password: 'SENHA@123',
       confirmPassword: 'SENHA@123',
@@ -120,7 +120,7 @@ describe('Registration Validator', () => {
     }
   })
 
-  it('should reject password without number', () => {
+  it('deve rejeitar senha sem número', () => {
     const invalidData = {
       password: 'Senha@abc',
       confirmPassword: 'Senha@abc',
@@ -135,7 +135,7 @@ describe('Registration Validator', () => {
     }
   })
 
-  it('should reject password without special character', () => {
+  it('deve rejeitar senha sem caractere especial', () => {
     const invalidData = {
       password: 'Senha123',
       confirmPassword: 'Senha123',
@@ -150,7 +150,7 @@ describe('Registration Validator', () => {
     }
   })
 
-  it('should reject password too short', () => {
+  it('deve rejeitar senha muito curta', () => {
     const invalidData = {
       password: 'Sen@1',
       confirmPassword: 'Sen@1',
@@ -165,7 +165,7 @@ describe('Registration Validator', () => {
     }
   })
 
-  it('should reject when passwords do not match', () => {
+  it('deve rejeitar quando as senhas não coincidem', () => {
     const invalidData = {
       password: 'Senha@123',
       confirmPassword: 'Senha@456',
@@ -180,7 +180,7 @@ describe('Registration Validator', () => {
     }
   })
 
-  it('should reject invalid phone format', () => {
+  it('deve rejeitar formato de telefone inválido', () => {
     const invalidData = {
       password: 'Senha@123',
       confirmPassword: 'Senha@123',
@@ -195,7 +195,7 @@ describe('Registration Validator', () => {
     }
   })
 
-  it('should reject bio too short', () => {
+  it('deve rejeitar biografia muito curta', () => {
     const invalidData = {
       password: 'Senha@123',
       confirmPassword: 'Senha@123',
@@ -211,7 +211,7 @@ describe('Registration Validator', () => {
     }
   })
 
-  it('should reject bio too long', () => {
+  it('deve rejeitar biografia muito longa', () => {
     const invalidData = {
       password: 'Senha@123',
       confirmPassword: 'Senha@123',
@@ -227,7 +227,7 @@ describe('Registration Validator', () => {
     }
   })
 
-  it('should accept registration without bio', () => {
+  it('deve aceitar registro sem biografia', () => {
     const validData = {
       password: 'Senha@123',
       confirmPassword: 'Senha@123',

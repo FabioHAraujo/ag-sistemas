@@ -27,7 +27,7 @@ describe('GET /api/applications', () => {
     jest.clearAllMocks()
   })
 
-  it('should return all applications for admin', async () => {
+  it('deve retornar lista de candidaturas para admin', async () => {
     const mockApplications = [
       {
         id: '1',
@@ -85,7 +85,7 @@ describe('GET /api/applications', () => {
     })
   })
 
-  it('should filter applications by status', async () => {
+  it('deve filtrar candidaturas por status', async () => {
     const mockApplications = [
       {
         id: '1',
@@ -129,7 +129,7 @@ describe('GET /api/applications', () => {
     })
   })
 
-  it('should reject non-admin users', async () => {
+  it('deve rejeitar usuários não admin', async () => {
     ;(requireAdmin as jest.Mock).mockRejectedValue(new Error('Não autorizado'))
 
     const request = new Request('http://localhost:3000/api/applications') as NextRequest
@@ -142,7 +142,7 @@ describe('GET /api/applications', () => {
     expect(prisma.application.findMany).not.toHaveBeenCalled()
   })
 
-  it('should handle database errors', async () => {
+  it('deve tratar erros do banco de dados', async () => {
     ;(requireAdmin as jest.Mock).mockResolvedValue({
       id: 'admin-1',
       email: 'admin@networking.com',

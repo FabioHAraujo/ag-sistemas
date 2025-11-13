@@ -40,7 +40,7 @@ describe('POST /api/auth/register', () => {
     jest.clearAllMocks()
   })
 
-  it('should register user with valid token', async () => {
+  it('deve registrar um novo usuário com token válido', async () => {
     const mockApplication = {
       id: 'app-1',
       name: 'João Silva',
@@ -100,7 +100,7 @@ describe('POST /api/auth/register', () => {
     expect(cookies).toContain('HttpOnly')
   })
 
-  it('should reject registration without token', async () => {
+  it('deve rejeitar registro sem token', async () => {
     const request = new Request('http://localhost:3000/api/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -118,7 +118,7 @@ describe('POST /api/auth/register', () => {
     expect(data.error).toContain('inválidos')
   })
 
-  it('should reject registration with invalid token', async () => {
+  it('deve rejeitar registro com token inválido', async () => {
     ;(prisma.application.findUnique as jest.Mock).mockResolvedValue(null)
 
     const request = new Request('http://localhost:3000/api/auth/register', {
@@ -139,7 +139,7 @@ describe('POST /api/auth/register', () => {
     expect(data.error).toContain('inválido')
   })
 
-  it('should reject registration with expired token', async () => {
+  it('deve rejeitar registro com token expirado', async () => {
     const mockApplication = {
       id: 'app-1',
       status: 'APPROVED',
@@ -166,7 +166,7 @@ describe('POST /api/auth/register', () => {
     expect(data.error).toContain('expirado')
   })
 
-  it('should reject registration with non-approved application', async () => {
+  it('deve rejeitar registro com candidatura não aprovada', async () => {
     const mockApplication = {
       id: 'app-1',
       status: 'PENDING',
@@ -193,7 +193,7 @@ describe('POST /api/auth/register', () => {
     expect(data.error).toContain('aprovada')
   })
 
-  it('should reject registration if email already exists', async () => {
+  it('deve rejeitar registro se o email já existe', async () => {
     const mockApplication = {
       id: 'app-1',
       email: 'joao@empresa.com',
@@ -227,7 +227,7 @@ describe('POST /api/auth/register', () => {
     expect(data.error).toContain('cadastrado')
   })
 
-  it('should reject weak password', async () => {
+  it('deve rejeitar senha fraca', async () => {
     const mockApplication = {
       id: 'app-1',
       status: 'APPROVED',
