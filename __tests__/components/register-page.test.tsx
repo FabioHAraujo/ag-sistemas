@@ -3,6 +3,13 @@ import userEvent from '@testing-library/user-event'
 import { useSearchParams } from 'next/navigation'
 import RegisterPage from '@/app/register/page'
 
+jest.mock('sonner', () => ({
+  toast: {
+    error: jest.fn(),
+    success: jest.fn(),
+  },
+}))
+
 // Mock do fetch
 global.fetch = jest.fn()
 
@@ -24,6 +31,9 @@ describe('RegisterPage', () => {
       json: async () => ({}),
     })
     mockPush.mockClear()
+    const { toast } = require('sonner')
+    toast.error.mockClear()
+    toast.success.mockClear()
   })
 
   it('deve mostrar erro quando o token está ausente', () => {
@@ -177,7 +187,6 @@ describe('RegisterPage', () => {
     })
 
     const user = userEvent.setup()
-    const alertSpy = jest.spyOn(window, 'alert').mockImplementation(() => {})
 
     ;(global.fetch as jest.Mock).mockResolvedValueOnce({
       ok: true,
@@ -212,8 +221,6 @@ describe('RegisterPage', () => {
         })
       )
     })
-
-    alertSpy.mockRestore()
   })
 
   it('deve desabilitar o botão de envio durante o envio', async () => {

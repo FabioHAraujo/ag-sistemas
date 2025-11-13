@@ -2,6 +2,13 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import ApplyPage from '@/app/apply/page'
 
+jest.mock('sonner', () => ({
+  toast: {
+    error: jest.fn(),
+    success: jest.fn(),
+  },
+}))
+
 // Mock do fetch
 global.fetch = jest.fn()
 
@@ -17,6 +24,9 @@ describe('ApplyPage', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     ;(global.fetch as jest.Mock).mockClear()
+    const { toast } = require('sonner')
+    toast.error.mockClear()
+    toast.success.mockClear()
   })
 
   it('deve renderizar o formulário de candidatura', () => {
@@ -235,7 +245,7 @@ describe('ApplyPage', () => {
 
   it('deve tratar erros da API adequadamente', async () => {
     const user = userEvent.setup()
-    const alertSpy = jest.spyOn(window, 'alert').mockImplementation(() => {})
+    const { toast } = require('sonner')
 
     ;(global.fetch as jest.Mock).mockResolvedValue({
       ok: false,
@@ -262,11 +272,9 @@ describe('ApplyPage', () => {
 
     await waitFor(
       () => {
-        expect(alertSpy).toHaveBeenCalledWith('Já existe uma intenção pendente com este email')
+        expect(toast.error).toHaveBeenCalledWith('Já existe uma intenção pendente com este email')
       },
       { timeout: 3000 }
     )
-
-    alertSpy.mockRestore()
   })
 })
