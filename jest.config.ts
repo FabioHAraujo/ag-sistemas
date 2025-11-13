@@ -27,6 +27,9 @@ const config: Config = {
     '!**/node_modules/**',
     '!**/.next/**',
   ],
+  testEnvironmentOptions: {
+    customExportConditions: ['node', 'node-addons'],
+  },
 }
 
 export default config
