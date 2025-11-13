@@ -428,7 +428,7 @@ Este projeto foi desenvolvido como parte de um teste técnico e está disponíve
 - [Next.js](https://nextjs.org/) - Framework incrível
 - [Shadcn/ui](https://ui.shadcn.com/) - Componentes excepcionais
 - [Prisma](https://www.prisma.io/) - ORM moderno e eficiente
-- [Vercel](https://vercel.com/) - Plataforma de deploy
+- [Coolify](https://coolify.io/) - Me ajudando com meus deploys há 2 anos, simplesmente a melhor plataforma para quem tem servidor próprio ❤️
 
 ---
 
