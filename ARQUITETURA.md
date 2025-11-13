@@ -718,13 +718,13 @@ npx prisma migrate dev --name init
 - [x] Testes de autenticação
 
 ### Fase 3: Fluxo de Admissão (Dia 2-3)
-- [ ] Schema de applications
-- [ ] Formulário público de intenção
-- [ ] Área admin de revisão
-- [ ] Aprovação/rejeição + geração de tokens
-- [ ] Serviço de e-mail (console mock)
-- [ ] Página de cadastro completo
-- [ ] Testes E2E do fluxo
+- [X] Schema de applications
+- [X] Formulário público de intenção
+- [X] Área admin de revisão
+- [X] Aprovação/rejeição + geração de tokens
+- [X] Serviço de e-mail (console mock)
+- [X] Página de cadastro completo
+- [X] Testes E2E do fluxo
 
 ### Fase 4: Dashboard Mockado (Dia 3-4)
 - [ ] Componentes de estatísticas
