@@ -1,8 +1,8 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
@@ -26,6 +26,7 @@ type LoginFormData = z.infer<typeof loginSchema>
 
 export default function LoginPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -36,6 +37,32 @@ export default function LoginPage() {
       password: '',
     },
   })
+
+  // Verificar se já está autenticado ao carregar a página
+  useEffect(() => {
+    async function checkAuth() {
+      try {
+        const response = await fetch('/api/auth/me', {
+          credentials: 'include',
+        })
+
+        if (response.ok) {
+          // Já está autenticado, redirecionar
+          const redirectTo = searchParams.get('redirect')
+          if (redirectTo) {
+            router.push(redirectTo)
+          } else {
+            const data = await response.json()
+            router.push(data.user.role === 'ADMIN' ? '/admin/applications' : '/admin/dashboard')
+          }
+        }
+      } catch {
+        // Não autenticado, continuar na página de login
+      }
+    }
+
+    checkAuth()
+  }, [router, searchParams])
 
   async function onSubmit(data: LoginFormData) {
     setIsSubmitting(true)
@@ -54,12 +81,23 @@ export default function LoginPage() {
         throw new Error(result.error || 'Erro ao fazer login')
       }
 
-      // Redirecionar baseado no role
-      if (result.user.role === 'ADMIN') {
-        router.push('/admin/applications')
+      // Verificar se há um redirect parameter na URL
+      const redirectTo = searchParams.get('redirect')
+
+      if (redirectTo) {
+        // Redirecionar para a página solicitada
+        router.push(redirectTo)
       } else {
-        router.push('/dashboard')
+        // Redirecionar baseado no role
+        if (result.user.role === 'ADMIN') {
+          router.push('/admin/applications')
+        } else {
+          router.push('/admin/dashboard')
+        }
       }
+
+      // Forçar reload após navegação para garantir que o cookie seja reconhecido
+      setTimeout(() => router.refresh(), 100)
     } catch (error) {
       console.error('Login error:', error)
       setError(error instanceof Error ? error.message : 'Erro ao fazer login')

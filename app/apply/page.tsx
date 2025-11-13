@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -58,8 +59,7 @@ export default function ApplyPage() {
         router.push('/')
       }, 3000)
     } catch (error) {
-      console.error('Submit error:', error)
-      alert(error instanceof Error ? error.message : 'Erro ao enviar intenção')
+      toast.error(error instanceof Error ? error.message : 'Erro ao enviar intenção')
     } finally {
       setIsSubmitting(false)
     }

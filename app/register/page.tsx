@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -69,11 +70,10 @@ export default function RegisterPage() {
       }
 
       // Redirecionar para dashboard ou página de boas-vindas
-      alert('Cadastro realizado com sucesso! Bem-vindo(a)!')
+      toast.success('Cadastro realizado com sucesso! Bem-vindo(a)!')
       router.push('/')
     } catch (error) {
-      console.error('Submit error:', error)
-      alert(error instanceof Error ? error.message : 'Erro ao completar cadastro')
+      toast.error(error instanceof Error ? error.message : 'Erro ao completar cadastro')
     } finally {
       setIsSubmitting(false)
     }
