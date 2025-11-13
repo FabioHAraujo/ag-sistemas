@@ -710,12 +710,12 @@ npx prisma migrate dev --name init
 - [x] Jest + React Testing Library
 - [x] Variáveis de ambiente
 
-### Fase 2: Autenticação (Dia 1-2)
-- [ ] Schema de usuários (Prisma)
-- [ ] API Routes: login, register, me
-- [ ] Middleware JWT
-- [ ] Proteção de rotas
-- [ ] Testes de autenticação
+### Fase 2: Autenticação (Dia 1-2) ✅
+- [x] Schema de usuários (Prisma)
+- [x] API Routes: login, register, me, logout
+- [x] Middleware JWT
+- [x] Proteção de rotas
+- [x] Testes de autenticação
 
 ### Fase 3: Fluxo de Admissão (Dia 2-3)
 - [ ] Schema de applications
