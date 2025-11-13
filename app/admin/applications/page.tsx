@@ -14,6 +14,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { EmptyState } from '@/components/ui/empty-state'
+import { LoadingState } from '@/components/ui/loading-state'
 import {
   Table,
   TableBody,
@@ -144,7 +146,7 @@ export default function AdminApplicationsPage() {
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <p>Carregando...</p>
+        <LoadingState message="Carregando intenções..." />
       </div>
     )
   }
@@ -157,26 +159,26 @@ export default function AdminApplicationsPage() {
           <CardDescription>Revise e aprove/rejeite as intenções de novos membros</CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nome</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Empresa</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Data</TableHead>
-                <TableHead>Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {!applications || applications.length === 0 ? (
+          {!applications || applications.length === 0 ? (
+            <EmptyState
+              title="Nenhuma intenção encontrada"
+              description="Não há intenções de participação pendentes no momento."
+              icon="inbox"
+            />
+          ) : (
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center">
-                    Nenhuma intenção encontrada
-                  </TableCell>
+                  <TableHead>Nome</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Empresa</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Data</TableHead>
+                  <TableHead>Ações</TableHead>
                 </TableRow>
-              ) : (
-                applications.map((app) => (
+              </TableHeader>
+              <TableBody>
+                {applications.map((app) => (
                   <TableRow key={app.id}>
                     <TableCell className="font-medium">{app.name}</TableCell>
                     <TableCell>{app.email}</TableCell>
@@ -191,10 +193,10 @@ export default function AdminApplicationsPage() {
                       )}
                     </TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
 
