@@ -1,6 +1,8 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
+import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -39,6 +41,7 @@ interface Application {
 }
 
 export default function AdminApplicationsPage() {
+  const router = useRouter()
   const [applications, setApplications] = useState<Application[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedApp, setSelectedApp] = useState<Application | null>(null)
@@ -47,18 +50,26 @@ export default function AdminApplicationsPage() {
 
   const fetchApplications = useCallback(async () => {
     try {
-      const response = await fetch('/api/applications')
+      const response = await fetch('/api/applications', {
+        credentials: 'include',
+      })
+
+      if (response.status === 401) {
+        toast.error('Você não está autenticado')
+        router.push('/login?redirect=/admin/applications')
+        return
+      }
+
       if (!response.ok) throw new Error('Erro ao carregar intenções')
 
       const data = await response.json()
       setApplications(data.applications)
-    } catch (error) {
-      console.error('Fetch error:', error)
-      alert('Erro ao carregar intenções')
+    } catch (_error) {
+      toast.error('Erro ao carregar intenções')
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [router])
 
   useEffect(() => {
     fetchApplications()
@@ -69,19 +80,20 @@ export default function AdminApplicationsPage() {
     try {
       const response = await fetch(`/api/applications/${id}/approve`, {
         method: 'POST',
+        credentials: 'include',
       })
 
       if (!response.ok) throw new Error('Erro ao aprovar')
 
       const data = await response.json()
       setRegistrationLink(data.registrationLink)
+      toast.success('Intenção aprovada com sucesso!')
 
       // Atualizar lista
       await fetchApplications()
       setSelectedApp(null)
-    } catch (error) {
-      console.error('Approve error:', error)
-      alert('Erro ao aprovar intenção')
+    } catch (_error) {
+      toast.error('Erro ao aprovar intenção')
     } finally {
       setActionLoading(false)
     }
@@ -92,16 +104,18 @@ export default function AdminApplicationsPage() {
     try {
       const response = await fetch(`/api/applications/${id}/reject`, {
         method: 'POST',
+        credentials: 'include',
       })
 
       if (!response.ok) throw new Error('Erro ao rejeitar')
 
+      toast.success('Intenção rejeitada')
+
       // Atualizar lista
       await fetchApplications()
       setSelectedApp(null)
-    } catch (error) {
-      console.error('Reject error:', error)
-      alert('Erro ao rejeitar intenção')
+    } catch (_error) {
+      toast.error('Erro ao rejeitar intenção')
     } finally {
       setActionLoading(false)
     }
@@ -155,7 +169,7 @@ export default function AdminApplicationsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {applications.length === 0 ? (
+              {!applications || applications.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center">
                     Nenhuma intenção encontrada

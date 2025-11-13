@@ -1,6 +1,9 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { verifyToken } from '@/lib/auth/jwt'
 
+// Forçar uso do Node.js runtime (necessário para jsonwebtoken)
+export const runtime = 'nodejs'
+
 // Rotas públicas que não requerem autenticação
 const publicRoutes = [
   '/api/auth/login',
