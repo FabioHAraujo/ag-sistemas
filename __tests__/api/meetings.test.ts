@@ -1,3 +1,6 @@
+/**
+ * @jest-environment node
+ */
 import { NextRequest } from 'next/server'
 import {
   GET as GET_ATTENDANCE,
@@ -113,7 +116,7 @@ describe('Meetings API', () => {
         body: JSON.stringify({
           title: 'Reunião Semanal',
           description: 'Reunião semanal do grupo',
-          meetingDate: '2025-11-15T10:00:00',
+          meetingDate: '2025-11-15T10:00:00Z',
           location: 'Sala de Reuniões',
           type: 'REGULAR',
           status: 'SCHEDULED',

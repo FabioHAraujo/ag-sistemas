@@ -1,3 +1,6 @@
+/**
+ * @jest-environment node
+ */
 import { NextRequest } from 'next/server'
 import { DELETE, GET as GET_BY_ID, PATCH } from '@/app/api/announcements/[id]/route'
 import { GET, POST } from '@/app/api/announcements/route'

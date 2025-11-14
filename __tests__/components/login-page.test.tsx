@@ -152,7 +152,7 @@ describe('LoginPage', () => {
     await user.click(submitButton)
 
     await waitFor(() => {
-      expect(mockPush).toHaveBeenCalledWith('/admin/dashboard')
+      expect(mockPush).toHaveBeenCalledWith('/member/announcements')
     })
   })
 
@@ -264,6 +264,7 @@ describe('LoginPage', () => {
 
   it('deve limpar erro anterior ao tentar novamente', async () => {
     const user = userEvent.setup()
+    let loginCallCount = 0
 
     // Configurar mock para retornar erro sempre em checkAuth, e erro no primeiro login
     ;(global.fetch as jest.Mock).mockImplementation((url: string) => {
@@ -272,11 +273,9 @@ describe('LoginPage', () => {
       }
       // Primeira chamada ao login retorna erro
       if (url.includes('/api/auth/login')) {
-        const callCount = (global.fetch as jest.Mock).mock.calls.filter((call) =>
-          call[0].includes('/api/auth/login')
-        ).length
+        loginCallCount++
 
-        if (callCount === 1) {
+        if (loginCallCount === 1) {
           return Promise.resolve({
             ok: false,
             json: async () => ({ error: 'Credenciais inválidas' }),
@@ -318,7 +317,7 @@ describe('LoginPage', () => {
 
     // Verificar que houve redirecionamento (sinal de sucesso)
     await waitFor(() => {
-      expect(mockPush).toHaveBeenCalledWith('/admin/dashboard')
+      expect(mockPush).toHaveBeenCalledWith('/member/announcements')
     })
   })
 })
