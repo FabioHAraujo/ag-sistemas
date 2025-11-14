@@ -64,7 +64,7 @@ export function ReferralsByStatus({ data }: ReferralsByStatusProps) {
               cx="50%"
               cy="50%"
               outerRadius={100}
-              label={(entry) => `${entry.name}: ${entry.count}`}
+              label={(entry) => `${entry.payload.name}: ${entry.payload.count}`}
             >
               {chartData.map((entry) => (
                 <Cell key={entry.status} fill={entry.fill} />

@@ -1,8 +1,8 @@
 import type { Role } from '@prisma/client'
-import jwt from 'jsonwebtoken'
+import jwt, { type SignOptions } from 'jsonwebtoken'
 
-const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-key-change-in-production'
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '24h'
+const JWT_SECRET: string = process.env.JWT_SECRET || 'fallback-secret-key-change-in-production'
+const JWT_EXPIRES_IN: string = process.env.JWT_EXPIRES_IN || '24h'
 
 export interface JWTPayload {
   sub: string // user ID
@@ -16,9 +16,10 @@ export interface JWTPayload {
  * Gera um token JWT para um usuário
  */
 export function signToken(payload: Omit<JWTPayload, 'iat' | 'exp'>): string {
-  return jwt.sign(payload, JWT_SECRET, {
-    expiresIn: JWT_EXPIRES_IN as string,
-  })
+  const options: SignOptions = {
+    expiresIn: JWT_EXPIRES_IN as jwt.SignOptions['expiresIn'],
+  }
+  return jwt.sign(payload, JWT_SECRET, options)
 }
 
 /**

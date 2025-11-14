@@ -13,6 +13,7 @@ export type MeetingFormData = z.infer<typeof meetingSchema>
 export const attendanceSchema = z.object({
   status: z.enum(['PRESENT', 'ABSENT', 'EXCUSED', 'LATE']),
   notes: z.string().max(500).optional(),
+  memberId: z.string().uuid().optional(), // Somente admin pode fornecer
 })
 
 export type AttendanceFormData = z.infer<typeof attendanceSchema>

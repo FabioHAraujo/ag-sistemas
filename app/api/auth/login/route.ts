@@ -62,13 +62,24 @@ export async function POST(request: NextRequest) {
       token,
     })
 
+    // Cookie config - secure apenas em produção com HTTPS
+    const isProduction = process.env.NODE_ENV === 'production'
+    const forceInsecure = process.env.FORCE_INSECURE_COOKIES === 'true'
+
     response.cookies.set('auth-token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: isProduction && !forceInsecure,
       sameSite: 'lax',
       maxAge: 60 * 60 * 24, // 24 horas
       path: '/',
     })
+
+    console.log(
+      'Cookie set with secure:',
+      isProduction && !forceInsecure,
+      'NODE_ENV:',
+      process.env.NODE_ENV
+    )
 
     return response
   } catch (error) {
