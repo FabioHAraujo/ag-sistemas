@@ -53,7 +53,9 @@ function LoginForm() {
             router.push(redirectTo)
           } else {
             const data = await response.json()
-            router.push(data.user.role === 'ADMIN' ? '/admin/applications' : '/admin/dashboard')
+            router.push(
+              data.user.role === 'ADMIN' ? '/admin/applications' : '/member/announcements'
+            )
           }
         }
       } catch {
@@ -100,7 +102,7 @@ function LoginForm() {
         if (result.user.role === 'ADMIN') {
           window.location.href = '/admin/applications'
         } else {
-          window.location.href = '/admin/dashboard'
+          window.location.href = '/member/announcements'
         }
       }
     } catch (error) {

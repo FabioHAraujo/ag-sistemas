@@ -5,48 +5,30 @@ import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export default function MemberLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const [isLoggingOut, setIsLoggingOut] = useState(false)
 
   async function handleLogout() {
     setIsLoggingOut(true)
     try {
-      const response = await fetch('/api/auth/logout', {
+      await fetch('/api/auth/logout', {
         method: 'POST',
         credentials: 'include',
       })
-
-      if (response.ok) {
-        // Aguarda um pouco para garantir que o cookie foi removido
-        await new Promise((resolve) => setTimeout(resolve, 200))
-
-        // Limpa qualquer cache do Next.js
-        if ('caches' in window) {
-          const cacheNames = await window.caches.keys()
-          await Promise.all(cacheNames.map((name) => window.caches.delete(name)))
-        }
-
-        // Redireciona e força reload completo
-        window.location.replace('/login')
-      } else {
-        console.error('Logout failed:', await response.text())
-        setIsLoggingOut(false)
-      }
+      window.location.href = '/login'
     } catch (error) {
       console.error('Logout error:', error)
-      // Mesmo com erro, tenta redirecionar
-      window.location.replace('/login')
+      setIsLoggingOut(false)
     }
   }
 
   const navigation = [
-    { name: 'Dashboard', href: '/admin/dashboard' },
-    { name: 'Candidaturas', href: '/admin/applications' },
-    { name: 'Avisos', href: '/admin/announcements' },
-    { name: 'Reuniões', href: '/admin/meetings' },
-    { name: 'Membros', href: '/admin/members' },
-    { name: 'Financeiro', href: '/admin/payments' },
+    { name: 'Avisos', href: '/member/announcements' },
+    { name: 'Reuniões', href: '/member/meetings' },
+    { name: 'Indicações', href: '/member/referrals' },
+    { name: 'Membros', href: '/member/members' },
+    { name: 'Meu Perfil', href: '/member/profile' },
   ]
 
   return (
@@ -55,8 +37,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div className="container mx-auto px-4">
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center gap-8">
-              <Link href="/admin/dashboard" className="text-xl font-bold text-gray-900">
-                Networking Admin
+              <Link href="/member/announcements" className="text-xl font-bold text-gray-900">
+                Networking
               </Link>
               <div className="flex gap-4">
                 {navigation.map((item) => (
