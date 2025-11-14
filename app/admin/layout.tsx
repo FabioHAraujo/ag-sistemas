@@ -1,6 +1,25 @@
+'use client'
+
 import Link from 'next/link'
+import { useState } from 'react'
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
+
+  async function handleLogout() {
+    setIsLoggingOut(true)
+    try {
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+      })
+      window.location.href = '/login'
+    } catch (error) {
+      console.error('Logout error:', error)
+      setIsLoggingOut(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <nav className="bg-white border-b border-gray-200">
@@ -26,14 +45,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <form action="/api/auth/logout" method="POST">
-                <button
-                  type="submit"
-                  className="text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
-                >
-                  Sair
-                </button>
-              </form>
+              <button
+                type="button"
+                onClick={handleLogout}
+                disabled={isLoggingOut}
+                className="text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors disabled:opacity-50"
+              >
+                {isLoggingOut ? 'Saindo...' : 'Sair'}
+              </button>
             </div>
           </div>
         </div>
