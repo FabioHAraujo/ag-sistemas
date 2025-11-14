@@ -96,13 +96,13 @@ function LoginForm() {
 
       if (redirectTo) {
         // Redirecionar para a página solicitada
-        window.location.href = redirectTo
+        router.push(redirectTo)
       } else {
         // Redirecionar baseado no role
         if (result.user.role === 'ADMIN') {
-          window.location.href = '/admin/applications'
+          router.push('/admin/applications')
         } else {
-          window.location.href = '/member/announcements'
+          router.push('/member/announcements')
         }
       }
     } catch (error) {
