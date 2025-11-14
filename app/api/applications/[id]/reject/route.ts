@@ -2,11 +2,11 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/auth/get-current-user'
 import { prisma } from '@/lib/prisma'
 
-export async function POST(_request: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await requireAdmin()
 
-    const { id } = params
+    const { id } = await params
 
     // Verificar se application existe
     const application = await prisma.application.findUnique({
