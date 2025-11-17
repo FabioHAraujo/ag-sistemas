@@ -36,17 +36,17 @@ import { Textarea } from '@/components/ui/textarea'
 
 interface OneOnOne {
   id: string
-  scheduledDate: string
+  meetingDate: string
   location: string
   notes?: string
   status: 'SCHEDULED' | 'COMPLETED' | 'CANCELLED'
   createdAt: string
-  requestedBy: {
+  memberOne: {
     id: string
     name: string
     email: string
   }
-  requestedWith: {
+  memberTwo: {
     id: string
     name: string
     email: string
@@ -62,8 +62,9 @@ interface Member {
 }
 
 interface OneOnOneFormData {
-  requestedWithId: string
-  scheduledDate: string
+  memberTwoId: string
+  meetingDate: string
+  meetingTime: string
   location: string
   notes: string
 }
@@ -89,8 +90,9 @@ export default function AdminOneOnOnesPage() {
   const [selectedOneOnOne, setSelectedOneOnOne] = useState<OneOnOne | null>(null)
   const [actionLoading, setActionLoading] = useState(false)
   const [formData, setFormData] = useState<OneOnOneFormData>({
-    requestedWithId: '',
-    scheduledDate: '',
+    memberTwoId: '',
+    meetingDate: '',
+    meetingTime: '',
     location: '',
     notes: '',
   })
@@ -106,7 +108,7 @@ export default function AdminOneOnOnesPage() {
       }
 
       const data = await response.json()
-      setOneOnOnes(data.oneOnOnes)
+      setOneOnOnes(data.meetings || [])
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Erro ao carregar reuniões')
     } finally {
@@ -116,7 +118,7 @@ export default function AdminOneOnOnesPage() {
 
   const fetchMembers = useCallback(async () => {
     try {
-      const response = await fetch('/api/users', {
+      const response = await fetch('/api/members?status=active', {
         credentials: 'include',
       })
 
@@ -125,7 +127,7 @@ export default function AdminOneOnOnesPage() {
       }
 
       const data = await response.json()
-      setMembers(data.users.filter((u: Member) => u.status === 'ACTIVE'))
+      setMembers(data.members || [])
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Erro ao carregar membros')
     }
@@ -139,17 +141,20 @@ export default function AdminOneOnOnesPage() {
   const handleOpenDialog = (oneOnOne?: OneOnOne) => {
     if (oneOnOne) {
       setSelectedOneOnOne(oneOnOne)
+      const meetingDateTime = new Date(oneOnOne.meetingDate)
       setFormData({
-        requestedWithId: oneOnOne.requestedWith.id,
-        scheduledDate: new Date(oneOnOne.scheduledDate).toISOString().slice(0, 16),
+        memberTwoId: oneOnOne.memberTwo.id,
+        meetingDate: meetingDateTime.toISOString().slice(0, 10),
+        meetingTime: meetingDateTime.toTimeString().slice(0, 5),
         location: oneOnOne.location,
         notes: oneOnOne.notes || '',
       })
     } else {
       setSelectedOneOnOne(null)
       setFormData({
-        requestedWithId: '',
-        scheduledDate: '',
+        memberTwoId: '',
+        meetingDate: '',
+        meetingTime: '',
         location: '',
         notes: '',
       })
@@ -161,8 +166,9 @@ export default function AdminOneOnOnesPage() {
     setDialogOpen(false)
     setSelectedOneOnOne(null)
     setFormData({
-      requestedWithId: '',
-      scheduledDate: '',
+      memberTwoId: '',
+      meetingDate: '',
+      meetingTime: '',
       location: '',
       notes: '',
     })
@@ -175,9 +181,13 @@ export default function AdminOneOnOnesPage() {
     try {
       const url = selectedOneOnOne ? `/api/one-on-ones/${selectedOneOnOne.id}` : '/api/one-on-ones'
 
+      const meetingDateTime = new Date(`${formData.meetingDate}T${formData.meetingTime}`)
+
       const payload = {
-        ...formData,
-        scheduledDate: new Date(formData.scheduledDate).toISOString(),
+        memberTwoId: formData.memberTwoId,
+        meetingDate: meetingDateTime.toISOString(),
+        location: formData.location,
+        notes: formData.notes,
       }
 
       const response = await fetch(url, {
@@ -292,13 +302,13 @@ export default function AdminOneOnOnesPage() {
                 {oneOnOnes.map((oneOnOne) => (
                   <TableRow key={oneOnOne.id}>
                     <TableCell className="font-medium">
-                      {new Date(oneOnOne.scheduledDate).toLocaleString('pt-BR', {
+                      {new Date(oneOnOne.meetingDate).toLocaleString('pt-BR', {
                         dateStyle: 'short',
                         timeStyle: 'short',
                       })}
                     </TableCell>
-                    <TableCell>{oneOnOne.requestedBy.name}</TableCell>
-                    <TableCell>{oneOnOne.requestedWith.name}</TableCell>
+                    <TableCell>{oneOnOne.memberOne.name}</TableCell>
+                    <TableCell>{oneOnOne.memberTwo.name}</TableCell>
                     <TableCell>{oneOnOne.location}</TableCell>
                     <TableCell>
                       <Badge className={statusColors[oneOnOne.status]}>
@@ -371,11 +381,11 @@ export default function AdminOneOnOnesPage() {
           <form onSubmit={handleSubmit}>
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
-                <Label htmlFor="requestedWithId">Reunião com</Label>
+                <Label htmlFor="memberTwoId">Reunião com</Label>
                 <Select
-                  value={formData.requestedWithId}
+                  value={formData.memberTwoId}
                   onValueChange={(value: string) =>
-                    setFormData({ ...formData, requestedWithId: value })
+                    setFormData({ ...formData, memberTwoId: value })
                   }
                   required
                 >
@@ -392,15 +402,28 @@ export default function AdminOneOnOnesPage() {
                 </Select>
               </div>
 
-              <div className="grid gap-2">
-                <Label htmlFor="scheduledDate">Data e Hora</Label>
-                <Input
-                  id="scheduledDate"
-                  type="datetime-local"
-                  value={formData.scheduledDate}
-                  onChange={(e) => setFormData({ ...formData, scheduledDate: e.target.value })}
-                  required
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="meetingDate">Data</Label>
+                  <Input
+                    id="meetingDate"
+                    type="date"
+                    value={formData.meetingDate}
+                    onChange={(e) => setFormData({ ...formData, meetingDate: e.target.value })}
+                    required
+                  />
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="meetingTime">Hora</Label>
+                  <Input
+                    id="meetingTime"
+                    type="time"
+                    value={formData.meetingTime}
+                    onChange={(e) => setFormData({ ...formData, meetingTime: e.target.value })}
+                    required
+                  />
+                </div>
               </div>
 
               <div className="grid gap-2">

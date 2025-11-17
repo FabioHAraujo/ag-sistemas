@@ -44,7 +44,7 @@ interface Meeting {
   status: 'SCHEDULED' | 'COMPLETED' | 'CANCELLED'
   maxAttendees: number | null
   createdAt: string
-  organizer: {
+  creator: {
     id: string
     name: string
     email: string
@@ -63,6 +63,7 @@ interface MeetingFormData {
   title: string
   description: string
   meetingDate: string
+  meetingTime: string
   location: string
   type: 'MONTHLY' | 'SPECIAL' | 'WORKSHOP'
   maxAttendees: string
@@ -104,6 +105,7 @@ export default function AdminMeetingsPage() {
     title: '',
     description: '',
     meetingDate: '',
+    meetingTime: '',
     location: '',
     type: 'MONTHLY',
     maxAttendees: '',
@@ -137,10 +139,12 @@ export default function AdminMeetingsPage() {
   const handleOpenDialog = (meeting?: Meeting) => {
     if (meeting) {
       setSelectedMeeting(meeting)
+      const meetingDateTime = new Date(meeting.meetingDate)
       setFormData({
         title: meeting.title,
         description: meeting.description || '',
-        meetingDate: new Date(meeting.meetingDate).toISOString().slice(0, 16),
+        meetingDate: meetingDateTime.toISOString().slice(0, 10), // YYYY-MM-DD
+        meetingTime: meetingDateTime.toTimeString().slice(0, 5), // HH:MM
         location: meeting.location,
         type: meeting.type,
         maxAttendees: meeting.maxAttendees?.toString() || '',
@@ -151,6 +155,7 @@ export default function AdminMeetingsPage() {
         title: '',
         description: '',
         meetingDate: '',
+        meetingTime: '',
         location: '',
         type: 'MONTHLY',
         maxAttendees: '',
@@ -166,6 +171,7 @@ export default function AdminMeetingsPage() {
       title: '',
       description: '',
       meetingDate: '',
+      meetingTime: '',
       location: '',
       type: 'MONTHLY',
       maxAttendees: '',
@@ -179,9 +185,15 @@ export default function AdminMeetingsPage() {
     try {
       const url = selectedMeeting ? `/api/meetings/${selectedMeeting.id}` : '/api/meetings'
 
+      // Combinar data e hora
+      const meetingDateTime = new Date(`${formData.meetingDate}T${formData.meetingTime}`)
+
       const payload = {
-        ...formData,
-        meetingDate: new Date(formData.meetingDate).toISOString(),
+        title: formData.title,
+        description: formData.description,
+        meetingDate: meetingDateTime.toISOString(),
+        location: formData.location,
+        type: formData.type,
         maxAttendees: formData.maxAttendees ? parseInt(formData.maxAttendees, 10) : null,
       }
 
@@ -318,7 +330,7 @@ export default function AdminMeetingsPage() {
                       {meeting.attendances.filter((a) => a.attended).length} /{' '}
                       {meeting.attendances.length}
                     </TableCell>
-                    <TableCell>{meeting.organizer.name}</TableCell>
+                    <TableCell>{meeting.creator.name}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         <Button
@@ -406,16 +418,29 @@ export default function AdminMeetingsPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="meetingDate">Data e Hora</Label>
+                  <Label htmlFor="meetingDate">Data</Label>
                   <Input
                     id="meetingDate"
-                    type="datetime-local"
+                    type="date"
                     value={formData.meetingDate}
                     onChange={(e) => setFormData({ ...formData, meetingDate: e.target.value })}
                     required
                   />
                 </div>
 
+                <div className="grid gap-2">
+                  <Label htmlFor="meetingTime">Hora</Label>
+                  <Input
+                    id="meetingTime"
+                    type="time"
+                    value={formData.meetingTime}
+                    onChange={(e) => setFormData({ ...formData, meetingTime: e.target.value })}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
                   <Label htmlFor="location">Local</Label>
                   <Input
@@ -425,9 +450,6 @@ export default function AdminMeetingsPage() {
                     required
                   />
                 </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
                   <Label htmlFor="type">Tipo</Label>
                   <Select
