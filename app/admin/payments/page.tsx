@@ -60,6 +60,7 @@ type Payment = {
   paidAt: string | null
   status: 'PENDING' | 'PAID' | 'OVERDUE' | 'CANCELLED'
   paymentMethod: string | null
+  notes: string | null
   member: {
     id: string
     name: string
@@ -195,12 +196,31 @@ export default function AdminPaymentsPage() {
         return
       }
 
-      // TODO: Implementar API para criação em lote de cobranças
-      toast.success(`Cobranças geradas para ${targetMembers.length} membro(s)`)
+      // Criar cobranças em lote
+      const response = await fetch('/api/payments/bulk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          memberIds: targetMembers.map((m) => m.id),
+          planType: formData.planType,
+          amount: formData.amount,
+          dueDate: formData.dueDate,
+          description: formData.description,
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Erro ao gerar cobranças')
+      }
+
+      const result = await response.json()
+      toast.success(`${result.count} cobrança(s) gerada(s) com sucesso`)
       setCreateDialogOpen(false)
       fetchPayments()
     } catch (error) {
-      toast.error('Erro ao gerar cobranças')
+      toast.error(error instanceof Error ? error.message : 'Erro ao gerar cobranças')
       console.error(error)
     }
   }
@@ -242,6 +262,7 @@ export default function AdminPaymentsPage() {
 
   const getPlanTypeLabel = (planType: string) => {
     const labels: Record<string, string> = {
+      SINGLE: 'Única',
       MONTHLY: 'Mensal',
       QUARTERLY: 'Trimestral',
       ANNUAL: 'Anual',
@@ -384,6 +405,7 @@ export default function AdminPaymentsPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Membro</TableHead>
+                    <TableHead>Descrição</TableHead>
                     <TableHead>Plano</TableHead>
                     <TableHead>Valor</TableHead>
                     <TableHead>Vencimento</TableHead>
@@ -401,6 +423,11 @@ export default function AdminPaymentsPage() {
                           <div className="text-sm text-muted-foreground">
                             {payment.member.email}
                           </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="max-w-xs text-sm">
+                          {payment.notes || <span className="text-muted-foreground">-</span>}
                         </div>
                       </TableCell>
                       <TableCell>{getPlanTypeLabel(payment.membership.planType)}</TableCell>

@@ -74,6 +74,7 @@ enum OneOnOneStatus {
 }
 
 enum PlanType {
+  SINGLE
   MONTHLY
   QUARTERLY
   ANNUAL

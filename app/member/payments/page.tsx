@@ -161,6 +161,7 @@ export default function MemberPaymentsPage() {
 
   const getPlanTypeLabel = (planType: string) => {
     const labels: Record<string, string> = {
+      SINGLE: 'Única',
       MONTHLY: 'Mensal',
       QUARTERLY: 'Trimestral',
       ANNUAL: 'Anual',
@@ -200,7 +201,8 @@ export default function MemberPaymentsPage() {
                   <div className="flex items-start justify-between">
                     <div>
                       <CardTitle className="text-lg">
-                        Mensalidade {getPlanTypeLabel(payment.membership.planType)}
+                        {payment.notes ||
+                          `Mensalidade ${getPlanTypeLabel(payment.membership.planType)}`}
                       </CardTitle>
                       <CardDescription>
                         Vencimento: {new Date(payment.dueDate).toLocaleDateString('pt-BR')}
@@ -245,7 +247,8 @@ export default function MemberPaymentsPage() {
                     <div className="flex-1">
                       <div className="flex items-center gap-3">
                         <CardTitle className="text-base">
-                          Mensalidade {getPlanTypeLabel(payment.membership.planType)}
+                          {payment.notes ||
+                            `Mensalidade ${getPlanTypeLabel(payment.membership.planType)}`}
                         </CardTitle>
                         {getStatusBadge(payment.status)}
                       </div>
