@@ -51,7 +51,8 @@ interface Meeting {
   }
   attendances: Array<{
     id: string
-    attended: boolean
+    status: 'PRESENT' | 'ABSENT' | 'EXCUSED' | 'LATE'
+    checkedInAt?: string
     member: {
       id: string
       name: string
@@ -91,6 +92,20 @@ const statusLabels = {
   SCHEDULED: 'Agendada',
   COMPLETED: 'Concluída',
   CANCELLED: 'Cancelada',
+}
+
+const attendanceStatusColors = {
+  PRESENT: 'bg-green-100 text-green-800',
+  ABSENT: 'bg-red-100 text-red-800',
+  EXCUSED: 'bg-yellow-100 text-yellow-800',
+  LATE: 'bg-orange-100 text-orange-800',
+}
+
+const attendanceStatusLabels = {
+  PRESENT: 'Presente',
+  ABSENT: 'Ausente',
+  EXCUSED: 'Justificado',
+  LATE: 'Atrasado',
 }
 
 export default function AdminMeetingsPage() {
@@ -327,7 +342,7 @@ export default function AdminMeetingsPage() {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      {meeting.attendances.filter((a) => a.attended).length} /{' '}
+                      {meeting.attendances.filter((a) => a.status === 'PRESENT').length} /{' '}
                       {meeting.attendances.length}
                     </TableCell>
                     <TableCell>{meeting.creator.name}</TableCell>
@@ -544,11 +559,9 @@ export default function AdminMeetingsPage() {
                     <TableRow key={attendance.id}>
                       <TableCell>{attendance.member.name}</TableCell>
                       <TableCell className="text-center">
-                        {attendance.attended ? (
-                          <Badge className="bg-green-100 text-green-800">Presente</Badge>
-                        ) : (
-                          <Badge variant="secondary">Ausente</Badge>
-                        )}
+                        <Badge className={attendanceStatusColors[attendance.status]}>
+                          {attendanceStatusLabels[attendance.status]}
+                        </Badge>
                       </TableCell>
                     </TableRow>
                   ))}
