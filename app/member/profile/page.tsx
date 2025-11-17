@@ -72,7 +72,7 @@ export default function ProfilePage() {
   const fetchProfile = useCallback(async () => {
     try {
       // Get current user ID from session
-      const sessionResponse = await fetch('/api/auth/session', {
+      const sessionResponse = await fetch('/api/auth/me', {
         credentials: 'include',
       })
 
@@ -83,7 +83,7 @@ export default function ProfilePage() {
       const session = await sessionResponse.json()
 
       // Fetch profile data
-      const response = await fetch(`/api/members/${session.userId}`, {
+      const response = await fetch(`/api/members/${session.user.id}`, {
         credentials: 'include',
       })
 
