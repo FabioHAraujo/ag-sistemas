@@ -171,6 +171,12 @@ function LoginForm() {
             </Button>
           </form>
         </Form>
+
+        <div className="mt-4 rounded-md bg-blue-50 p-3 text-sm text-blue-700 dark:bg-blue-950 dark:text-blue-300">
+          <p className="font-semibold">Login do administrador:</p>
+          <p className="mt-1">Email: admin@networking.com</p>
+          <p>Senha: Admin@123</p>
+        </div>
       </CardContent>
     </Card>
   )
