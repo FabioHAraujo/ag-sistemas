@@ -3,6 +3,14 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import {
+  NavigationMenu,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  navigationMenuTriggerStyle,
+} from '@/components/ui/navigation-menu'
 import { cn } from '@/lib/utils'
 
 export default function MemberLayout({ children }: { children: React.ReactNode }) {
@@ -26,52 +34,47 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
   const navigation = [
     { name: 'Avisos', href: '/member/announcements' },
     { name: 'Reuniões', href: '/member/meetings' },
-    { name: 'Reuniões 1-a-1', href: '/member/one-on-ones' },
+    { name: '1-a-1', href: '/member/one-on-ones' },
     { name: 'Indicações', href: '/member/referrals' },
     { name: 'Pagamentos', href: '/member/payments' },
     { name: 'Membros', href: '/member/members' },
-    { name: 'Meu Perfil', href: '/member/profile' },
+    { name: 'Perfil', href: '/member/profile' },
   ]
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white border-b border-gray-200">
-        <div className="container mx-auto px-4">
-          <div className="flex h-16 items-center justify-between">
-            <div className="flex items-center gap-8">
-              <Link href="/member/announcements" className="text-xl font-bold text-gray-900">
-                Networking
-              </Link>
-              <div className="flex gap-4">
+    <div className="min-h-screen bg-background">
+      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
+        <div className="container mx-auto flex h-14 items-center px-4">
+          <div className="mr-4 flex">
+            <Link href="/member/announcements" className="mr-6 flex items-center space-x-2">
+              <span className="font-bold">Networking</span>
+            </Link>
+            <NavigationMenu>
+              <NavigationMenuList>
                 {navigation.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={cn(
-                      'text-sm font-medium transition-colors',
-                      pathname === item.href
-                        ? 'text-gray-900 border-b-2 border-gray-900'
-                        : 'text-gray-700 hover:text-gray-900'
-                    )}
-                  >
-                    {item.name}
-                  </Link>
+                  <NavigationMenuItem key={item.href}>
+                    <Link href={item.href} legacyBehavior passHref>
+                      <NavigationMenuLink
+                        className={cn(
+                          navigationMenuTriggerStyle(),
+                          pathname === item.href && 'bg-accent'
+                        )}
+                      >
+                        {item.name}
+                      </NavigationMenuLink>
+                    </Link>
+                  </NavigationMenuItem>
                 ))}
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              <button
-                type="button"
-                onClick={handleLogout}
-                disabled={isLoggingOut}
-                className="text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors disabled:opacity-50"
-              >
-                {isLoggingOut ? 'Saindo...' : 'Sair'}
-              </button>
-            </div>
+              </NavigationMenuList>
+            </NavigationMenu>
+          </div>
+          <div className="flex flex-1 items-center justify-end space-x-2">
+            <Button variant="ghost" onClick={handleLogout} disabled={isLoggingOut}>
+              {isLoggingOut ? 'Saindo...' : 'Sair'}
+            </Button>
           </div>
         </div>
-      </nav>
+      </header>
       <main>{children}</main>
     </div>
   )
