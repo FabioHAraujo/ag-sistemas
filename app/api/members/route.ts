@@ -19,9 +19,9 @@ export async function GET(request: NextRequest) {
     const where: Record<string, unknown> = {}
 
     if (status === 'active') {
-      where.isActive = true
+      where.status = 'ACTIVE'
     } else if (status === 'inactive') {
-      where.isActive = false
+      where.status = 'INACTIVE'
     }
 
     if (role) {
@@ -86,7 +86,7 @@ export async function GET(request: NextRequest) {
       ...('_count' in u && { _count: u._count }),
     }))
 
-    return NextResponse.json(members)
+    return NextResponse.json({ members })
   } catch (error) {
     console.error('Error fetching members:', error)
     return NextResponse.json({ error: 'Erro ao buscar membros' }, { status: 500 })

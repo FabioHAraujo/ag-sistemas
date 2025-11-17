@@ -47,7 +47,7 @@ export default function MembersPage() {
       }
 
       const data = await response.json()
-      setMembers(Array.isArray(data) ? data : [])
+      setMembers(data.members || [])
     } catch (error) {
       console.error('Error fetching members:', error)
       toast.error(error instanceof Error ? error.message : 'Erro ao carregar membros')
