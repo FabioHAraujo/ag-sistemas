@@ -27,9 +27,13 @@ const protectedRoutes = [
 const adminRoutes = [
   '/api/admin',
   '/api/applications', // GET, PATCH para admin
-  '/api/meetings', // POST para admin
   '/api/announcements', // POST, PATCH, DELETE para admin
   '/api/payments', // GET, PATCH para admin
+]
+
+// Rotas específicas de admin em meetings (exceto attendance que é público para membros)
+const adminMeetingRoutes = [
+  '/api/meetings', // POST direto para criar reunião (não inclui subrotas)
 ]
 
 export function middleware(request: NextRequest) {
@@ -71,11 +75,18 @@ export function middleware(request: NextRequest) {
 
     // Verificar se rota requer ADMIN
     const isAdminRoute = adminRoutes.some((route) => pathname.startsWith(route))
-    if (isAdminRoute && request.method !== 'GET' && payload.role !== 'ADMIN') {
-      return NextResponse.json(
-        { error: 'Acesso negado. Requer permissões de administrador.' },
-        { status: 403 }
-      )
+
+    // Verificar rotas específicas de meetings que requerem admin
+    const isAdminMeetingRoute =
+      adminMeetingRoutes.some((route) => pathname === route) && request.method === 'POST'
+
+    if ((isAdminRoute && request.method !== 'GET') || isAdminMeetingRoute) {
+      if (payload.role !== 'ADMIN') {
+        return NextResponse.json(
+          { error: 'Acesso negado. Requer permissões de administrador.' },
+          { status: 403 }
+        )
+      }
     }
 
     // Adicionar user info aos headers para uso nas API routes
