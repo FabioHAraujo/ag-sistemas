@@ -10,8 +10,10 @@ export const paymentSchema = z.object({
 
 export const updatePaymentSchema = z.object({
   status: z.enum(['PENDING', 'PAID', 'OVERDUE', 'CANCELLED']).optional(),
-  paidAt: z.string().datetime().optional(),
-  paymentMethod: z.string().optional(),
+  paidAt: z.string().datetime().optional().nullable(),
+  paymentMethod: z.string().optional().nullable(),
+  transactionId: z.string().optional().nullable(),
+  notes: z.string().optional().nullable(),
 })
 
 export type PaymentFormData = z.infer<typeof paymentSchema>

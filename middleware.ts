@@ -28,7 +28,11 @@ const adminRoutes = [
   '/api/admin',
   '/api/applications', // GET, PATCH para admin
   '/api/announcements', // POST, PATCH, DELETE para admin
-  '/api/payments', // GET, PATCH para admin
+]
+
+// Rotas de admin que são apenas POST direto (não subrotas)
+const adminOnlyPostRoutes = [
+  '/api/payments', // POST /api/payments (criar pagamento - só admin)
 ]
 
 // Rotas específicas de admin em meetings (exceto attendance que é público para membros)
@@ -76,11 +80,19 @@ export function middleware(request: NextRequest) {
     // Verificar se rota requer ADMIN
     const isAdminRoute = adminRoutes.some((route) => pathname.startsWith(route))
 
-    // Verificar rotas específicas de meetings que requerem admin
+    // Verificar rotas específicas de meetings que requerem admin (POST direto)
     const isAdminMeetingRoute =
       adminMeetingRoutes.some((route) => pathname === route) && request.method === 'POST'
 
-    if ((isAdminRoute && request.method !== 'GET') || isAdminMeetingRoute) {
+    // Verificar se é POST direto em /api/payments (criar pagamento - só admin)
+    const isAdminOnlyPost =
+      adminOnlyPostRoutes.some((route) => pathname === route) && request.method === 'POST'
+
+    // Bloquear se:
+    // 1. É rota admin E não é GET (admin routes sempre bloqueiam não-GET para non-admins)
+    // 2. OU é admin meeting route (POST /api/meetings)
+    // 3. OU é admin only post (POST /api/payments direto)
+    if ((isAdminRoute && request.method !== 'GET') || isAdminMeetingRoute || isAdminOnlyPost) {
       if (payload.role !== 'ADMIN') {
         return NextResponse.json(
           { error: 'Acesso negado. Requer permissões de administrador.' },

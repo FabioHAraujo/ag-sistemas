@@ -57,13 +57,19 @@ export default function MemberPaymentsPage() {
 
   const fetchPayments = useCallback(async () => {
     try {
-      const response = await fetch('/api/payments')
-      if (!response.ok) throw new Error('Erro ao carregar pagamentos')
+      const response = await fetch('/api/payments', {
+        credentials: 'include',
+      })
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Erro ao carregar pagamentos')
+      }
       const data = await response.json()
       setPayments(data)
     } catch (error) {
-      toast.error('Erro ao carregar pagamentos')
-      console.error(error)
+      const errorMessage = error instanceof Error ? error.message : 'Erro ao carregar pagamentos'
+      toast.error(errorMessage)
+      console.error('Erro ao buscar pagamentos:', error)
     } finally {
       setLoading(false)
     }
@@ -80,6 +86,7 @@ export default function MemberPaymentsPage() {
     try {
       const response = await fetch(`/api/payments/${payment.id}/pix`, {
         method: 'POST',
+        credentials: 'include',
       })
 
       if (!response.ok) {
@@ -113,6 +120,7 @@ export default function MemberPaymentsPage() {
       const response = await fetch(`/api/payments/${selectedPayment.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           status: 'PAID',
           paidAt: new Date().toISOString(),
@@ -172,15 +180,15 @@ export default function MemberPaymentsPage() {
   const paidPayments = payments.filter((p) => p.status === 'PAID')
 
   return (
-    <div className="space-y-6">
-      <div>
+    <div className="container mx-auto py-10">
+      <div className="mb-6">
         <h1 className="text-3xl font-bold">Meus Pagamentos</h1>
         <p className="text-muted-foreground">Gerencie suas mensalidades e pagamentos</p>
       </div>
 
       {/* Pagamentos Pendentes */}
       {pendingPayments.length > 0 && (
-        <div className="space-y-4">
+        <div className="space-y-4 mb-6">
           <h2 className="text-xl font-semibold">Pagamentos Pendentes</h2>
           <div className="grid gap-4 md:grid-cols-2">
             {pendingPayments.map((payment) => (
@@ -227,7 +235,7 @@ export default function MemberPaymentsPage() {
 
       {/* Histórico de Pagamentos */}
       {paidPayments.length > 0 && (
-        <div className="space-y-4">
+        <div className="space-y-4 mb-6">
           <h2 className="text-xl font-semibold">Histórico de Pagamentos</h2>
           <div className="grid gap-4">
             {paidPayments.map((payment) => (

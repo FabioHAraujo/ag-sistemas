@@ -1,6 +1,6 @@
 'use client'
 
-import { AlertCircle, CheckCircle2, DollarSign, TrendingUp } from 'lucide-react'
+import { AlertCircle, CheckCircle2, DollarSign, Plus, TrendingUp } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
@@ -49,13 +49,19 @@ export default function AdminPaymentsPage() {
     try {
       const url = statusFilter === 'all' ? '/api/payments' : `/api/payments?status=${statusFilter}`
 
-      const response = await fetch(url)
-      if (!response.ok) throw new Error('Erro ao carregar pagamentos')
+      const response = await fetch(url, {
+        credentials: 'include',
+      })
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Erro ao carregar pagamentos')
+      }
       const data = await response.json()
       setPayments(data)
     } catch (error) {
-      toast.error('Erro ao carregar pagamentos')
-      console.error(error)
+      const errorMessage = error instanceof Error ? error.message : 'Erro ao carregar pagamentos'
+      toast.error(errorMessage)
+      console.error('Erro ao buscar pagamentos:', error)
     } finally {
       setLoading(false)
     }
@@ -70,6 +76,7 @@ export default function AdminPaymentsPage() {
       const response = await fetch(`/api/payments/${paymentId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           status,
           ...(status === 'PAID' && { paidAt: new Date().toISOString() }),
@@ -125,14 +132,20 @@ export default function AdminPaymentsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Gestão de Pagamentos</h1>
-        <p className="text-muted-foreground">Acompanhe e gerencie todos os pagamentos do grupo</p>
+    <div className="container mx-auto py-10">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-3xl font-bold">Gestão de Pagamentos</h1>
+          <p className="text-muted-foreground">Acompanhe e gerencie todos os pagamentos do grupo</p>
+        </div>
+        <Button>
+          <Plus className="mr-2 h-4 w-4" />
+          Gerar Cobrança
+        </Button>
       </div>
 
       {/* Estatísticas */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-4 mb-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Geral</CardTitle>

@@ -54,13 +54,15 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
 
 /**
  * PATCH /api/payments/[id]
- * Atualiza pagamento (somente admin)
+ * Atualiza pagamento
+ * - Admin pode atualizar qualquer pagamento
+ * - Membro pode marcar como pago apenas seus próprios pagamentos
  */
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await getCurrentUser()
-    if (!user || user.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
+    if (!user) {
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
     }
 
     const { id } = await params
@@ -73,6 +75,11 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
     if (!payment) {
       return NextResponse.json({ error: 'Pagamento não encontrado' }, { status: 404 })
+    }
+
+    // Membros só podem atualizar seus próprios pagamentos
+    if (user.role !== 'ADMIN' && payment.memberId !== user.id) {
+      return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
     }
 
     const updated = await prisma.payment.update({
