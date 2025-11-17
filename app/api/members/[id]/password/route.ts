@@ -5,8 +5,9 @@ import { prisma } from '@/lib/prisma'
 import { updatePasswordSchema } from '@/lib/validators/member'
 
 // PATCH /api/members/[id]/password - Update member password
-export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params
     const user = await getCurrentUser()
 
     if (!user) {
@@ -14,7 +15,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     }
 
     // Members can only change their own password
-    if (user.id !== params.id) {
+    if (user.id !== id) {
       return NextResponse.json({ error: 'Sem permissão' }, { status: 403 })
     }
 
@@ -23,7 +24,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
 
     // Get current user with password
     const userData = await prisma.user.findUnique({
-      where: { id: params.id },
+      where: { id },
       select: { passwordHash: true },
     })
 
@@ -46,7 +47,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
 
     // Update password
     await prisma.user.update({
-      where: { id: params.id },
+      where: { id },
       data: { passwordHash: hashedPassword },
     })
 

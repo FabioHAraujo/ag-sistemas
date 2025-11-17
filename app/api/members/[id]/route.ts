@@ -4,8 +4,9 @@ import { prisma } from '@/lib/prisma'
 import { updateMemberSchema } from '@/lib/validators/member'
 
 // GET /api/members/[id] - Get single member details
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params
     const user = await getCurrentUser()
 
     if (!user) {
@@ -13,7 +14,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     }
 
     const userData = await prisma.user.findUnique({
-      where: { id: params.id },
+      where: { id },
       select: {
         id: true,
         name: true,
@@ -86,8 +87,9 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 }
 
 // PATCH /api/members/[id] - Update member
-export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params
     const user = await getCurrentUser()
 
     if (!user) {
@@ -95,7 +97,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     }
 
     // Members can only update themselves, admins can update anyone
-    if (user.role !== 'ADMIN' && user.id !== params.id) {
+    if (user.role !== 'ADMIN' && user.id !== id) {
       return NextResponse.json({ error: 'Sem permissão' }, { status: 403 })
     }
 
@@ -106,8 +108,8 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     const { name, email, role, isActive, phone, company, position, bio, linkedinUrl } =
       validatedData
 
-    const userUpdate: any = {}
-    const profileUpdate: any = {}
+    const userUpdate: Record<string, unknown> = {}
+    const profileUpdate: Record<string, unknown> = {}
 
     if (name) userUpdate.name = name
     if (email) userUpdate.email = email
@@ -129,7 +131,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
       const existingUser = await prisma.user.findFirst({
         where: {
           email,
-          NOT: { id: params.id },
+          NOT: { id },
         },
       })
 
@@ -139,12 +141,15 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     }
 
     const updatedUser = await prisma.user.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         ...userUpdate,
         profile: {
           upsert: {
-            create: profileUpdate,
+            create: {
+              company: company || '',
+              ...profileUpdate,
+            },
             update: profileUpdate,
           },
         },
@@ -194,8 +199,12 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
 }
 
 // DELETE /api/members/[id] - Deactivate member (soft delete)
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
+    const { id } = await params
     const user = await getCurrentUser()
 
     if (!user || user.role !== 'ADMIN') {
@@ -203,7 +212,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     }
 
     // Cannot deactivate yourself
-    if (user.id === params.id) {
+    if (user.id === id) {
       return NextResponse.json(
         { error: 'Você não pode desativar sua própria conta' },
         { status: 400 }
@@ -211,7 +220,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     }
 
     const updatedUser = await prisma.user.update({
-      where: { id: params.id },
+      where: { id },
       data: { status: 'INACTIVE' },
       select: {
         id: true,

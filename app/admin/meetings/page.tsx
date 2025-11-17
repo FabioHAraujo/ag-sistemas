@@ -182,7 +182,7 @@ export default function AdminMeetingsPage() {
       const payload = {
         ...formData,
         meetingDate: new Date(formData.meetingDate).toISOString(),
-        maxAttendees: formData.maxAttendees ? parseInt(formData.maxAttendees) : null,
+        maxAttendees: formData.maxAttendees ? parseInt(formData.maxAttendees, 10) : null,
       }
 
       const response = await fetch(url, {

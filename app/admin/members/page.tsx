@@ -307,7 +307,10 @@ export default function AdminMembersPage() {
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-80"
             />
-            <Select value={filterStatus} onValueChange={(value: any) => setFilterStatus(value)}>
+            <Select
+              value={filterStatus}
+              onValueChange={(value: 'all' | 'active' | 'inactive') => setFilterStatus(value)}
+            >
               <SelectTrigger className="w-40">
                 <SelectValue />
               </SelectTrigger>

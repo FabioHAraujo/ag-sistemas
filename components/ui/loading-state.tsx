@@ -36,10 +36,13 @@ export function LoadingState({ message = 'Carregando...', fullScreen = false }: 
 export function TableSkeleton({ rows = 5, columns = 4 }: { rows?: number; columns?: number }) {
   return (
     <div className="space-y-3">
-      {Array.from({ length: rows }).map((_, i) => (
-        <div key={`row-${i}`} className="flex gap-4">
-          {Array.from({ length: columns }).map((_, j) => (
-            <div key={`col-${i}-${j}`} className="h-8 bg-muted animate-pulse rounded flex-1" />
+      {Array.from({ length: rows }, (_, i) => i).map((rowIndex) => (
+        <div key={`row-${rowIndex}`} className="flex gap-4">
+          {Array.from({ length: columns }, (_, j) => j).map((colIndex) => (
+            <div
+              key={`col-${rowIndex}-${colIndex}`}
+              className="h-8 bg-muted animate-pulse rounded flex-1"
+            />
           ))}
         </div>
       ))}
@@ -53,8 +56,8 @@ export function TableSkeleton({ rows = 5, columns = 4 }: { rows?: number; column
 export function CardSkeleton({ count = 3 }: { count?: number }) {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-      {Array.from({ length: count }).map((_, i) => (
-        <Card key={`card-${i}`}>
+      {Array.from({ length: count }, (_, i) => i).map((cardIndex) => (
+        <Card key={`card-${cardIndex}`}>
           <CardContent className="p-6 space-y-3">
             <div className="h-4 bg-muted animate-pulse rounded w-2/3" />
             <div className="h-8 bg-muted animate-pulse rounded" />

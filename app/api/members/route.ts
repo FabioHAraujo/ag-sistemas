@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     const role = searchParams.get('role') // 'ADMIN' | 'MEMBER'
     const search = searchParams.get('search') // search by name or email
 
-    const where: any = {}
+    const where: Record<string, unknown> = {}
 
     if (status === 'active') {
       where.isActive = true

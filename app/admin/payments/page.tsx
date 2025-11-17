@@ -155,8 +155,8 @@ export default function AdminPaymentsPage() {
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({
-          month: parseInt(generateMonth),
-          year: parseInt(generateYear),
+          month: parseInt(generateMonth, 10),
+          year: parseInt(generateYear, 10),
         }),
       })
 

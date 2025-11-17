@@ -8,7 +8,7 @@ import { updateMembershipSchema } from '@/lib/validators/membership'
  * GET /api/memberships/[id]
  * Busca associação por ID
  */
-export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await getCurrentUser()
     if (!user) {
@@ -73,12 +73,22 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       return NextResponse.json({ error: 'Associação não encontrada' }, { status: 404 })
     }
 
+    // Build update data conditionally
+    const updateData: {
+      planType?: 'MONTHLY' | 'QUARTERLY' | 'ANNUAL'
+      amount?: number
+      status?: 'ACTIVE' | 'SUSPENDED' | 'CANCELLED'
+      endDate?: Date
+    } = {}
+
+    if (data.planType) updateData.planType = data.planType
+    if (data.amount !== undefined) updateData.amount = data.amount
+    if (data.status) updateData.status = data.status
+    if (data.endDate) updateData.endDate = new Date(data.endDate)
+
     const updated = await prisma.membership.update({
       where: { id },
-      data: {
-        ...data,
-        endDate: data.endDate ? new Date(data.endDate) : undefined,
-      },
+      data: updateData,
       include: {
         member: {
           select: {
@@ -101,7 +111,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
  * Cancela associação (somente admin)
  */
 export async function DELETE(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
