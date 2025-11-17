@@ -45,6 +45,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: 'Candidaturas', href: '/admin/applications' },
     { name: 'Avisos', href: '/admin/announcements' },
     { name: 'Reuniões', href: '/admin/meetings' },
+    { name: 'Reuniões 1-a-1', href: '/admin/one-on-ones' },
     { name: 'Membros', href: '/admin/members' },
     { name: 'Financeiro', href: '/admin/payments' },
   ]

@@ -26,6 +26,7 @@ export default function MemberLayout({ children }: { children: React.ReactNode }
   const navigation = [
     { name: 'Avisos', href: '/member/announcements' },
     { name: 'Reuniões', href: '/member/meetings' },
+    { name: 'Reuniões 1-a-1', href: '/member/one-on-ones' },
     { name: 'Indicações', href: '/member/referrals' },
     { name: 'Membros', href: '/member/members' },
     { name: 'Meu Perfil', href: '/member/profile' },
