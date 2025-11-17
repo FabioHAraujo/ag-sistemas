@@ -61,8 +61,26 @@ const statusLabels = {
 export default function MeetingsPage() {
   const [meetings, setMeetings] = useState<Meeting[]>([])
   const [loading, setLoading] = useState(true)
-  const [checkingIn, setCheckingIn] = useState<string | null>(null)
+  const [actionLoading, setActionLoading] = useState<string | null>(null)
+  const [currentUserId, setCurrentUserId] = useState<string>('')
   const router = useRouter()
+
+  const fetchCurrentUser = useCallback(async () => {
+    try {
+      const response = await fetch('/api/auth/me', {
+        credentials: 'include',
+      })
+
+      if (!response.ok) {
+        throw new Error('Erro ao carregar usuário')
+      }
+
+      const data = await response.json()
+      setCurrentUserId(data.user.id)
+    } catch (error) {
+      console.error('Erro ao carregar usuário:', error)
+    }
+  }, [])
 
   const fetchMeetings = useCallback(async () => {
     try {
@@ -89,33 +107,68 @@ export default function MeetingsPage() {
   }, [router])
 
   useEffect(() => {
+    fetchCurrentUser()
     fetchMeetings()
-  }, [fetchMeetings])
+  }, [fetchCurrentUser, fetchMeetings])
 
-  const handleCheckIn = async (meetingId: string) => {
-    setCheckingIn(meetingId)
+  const handleAttendanceUpdate = async (meetingId: string, status: AttendanceStatus) => {
+    setActionLoading(meetingId)
     try {
       const response = await fetch(`/api/meetings/${meetingId}/attendance`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          status: 'PRESENT',
-        }),
+        body: JSON.stringify({ status }),
       })
 
       if (!response.ok) {
-        throw new Error('Erro ao fazer check-in')
+        throw new Error('Erro ao atualizar presença')
       }
 
-      toast.success('Check-in realizado com sucesso!')
+      const messages = {
+        PRESENT: 'Presença confirmada com sucesso!',
+        EXCUSED: 'Ausência justificada com sucesso!',
+        LATE: 'Check-in registrado (atrasado)',
+      }
+
+      toast.success(messages[status] || 'Presença atualizada!')
       await fetchMeetings()
     } catch (error) {
-      console.error('Erro ao fazer check-in:', error)
-      toast.error('Erro ao fazer check-in')
+      console.error('Erro ao atualizar presença:', error)
+      toast.error('Erro ao atualizar presença')
     } finally {
-      setCheckingIn(null)
+      setActionLoading(null)
     }
+  }
+
+  const handleCheckIn = async (meetingId: string, meetingDate: Date) => {
+    const now = new Date()
+    const minutesAfterStart = Math.floor((now.getTime() - meetingDate.getTime()) / (1000 * 60))
+
+    // Se passou mais de 10 minutos, marca como atrasado
+    const status = minutesAfterStart > 10 ? 'LATE' : 'PRESENT'
+
+    await handleAttendanceUpdate(meetingId, status)
+  }
+
+  const getUserAttendance = (meeting: Meeting) => {
+    return meeting.attendances.find((a) => a.member.id === currentUserId)
+  }
+
+  const canDoCheckIn = (meetingDate: Date) => {
+    const now = new Date()
+    const minutesAfterStart = Math.floor((now.getTime() - meetingDate.getTime()) / (1000 * 60))
+
+    // Pode fazer check-in no horário ou até 10 minutos depois
+    return now >= meetingDate && minutesAfterStart <= 10
+  }
+
+  const isLateCheckIn = (meetingDate: Date) => {
+    const now = new Date()
+    const minutesAfterStart = Math.floor((now.getTime() - meetingDate.getTime()) / (1000 * 60))
+
+    // Está atrasado se passou mais de 10 minutos
+    return now >= meetingDate && minutesAfterStart > 10
   }
 
   if (loading) {
@@ -143,8 +196,14 @@ export default function MeetingsPage() {
         <div className="grid gap-6">
           {upcomingMeetings.map((meeting) => {
             const meetingDate = new Date(meeting.meetingDate)
-            const isToday = meetingDate.toDateString() === new Date().toDateString()
-            const canCheckIn = isToday && meeting.status !== 'CANCELLED'
+            const userAttendance = getUserAttendance(meeting)
+            const hasConfirmed = userAttendance?.status === 'PRESENT'
+            const hasExcused = userAttendance?.status === 'EXCUSED'
+            const hasLate = userAttendance?.status === 'LATE'
+            const hasCheckedIn = hasConfirmed || hasLate
+
+            const canCheckInNow = canDoCheckIn(meetingDate)
+            const isLate = isLateCheckIn(meetingDate)
 
             return (
               <Card key={meeting.id}>
@@ -201,22 +260,113 @@ export default function MeetingsPage() {
                     </div>
                   </div>
 
-                  {canCheckIn && (
-                    <Button
-                      onClick={() => handleCheckIn(meeting.id)}
-                      disabled={checkingIn === meeting.id}
-                      className="w-full"
-                    >
-                      {checkingIn === meeting.id ? (
-                        'Fazendo check-in...'
-                      ) : (
-                        <>
-                          <CheckCircle2 className="mr-2 h-4 w-4" />
-                          Fazer Check-in
-                        </>
-                      )}
-                    </Button>
-                  )}
+                  {/* Botões de ação baseados no status */}
+                  <div className="space-y-2">
+                    {hasConfirmed && !hasLate && (
+                      <div className="flex items-center gap-2 p-3 bg-green-50 rounded-lg border border-green-200">
+                        <CheckCircle2 className="h-5 w-5 text-green-600" />
+                        <span className="text-sm text-green-700 font-medium">
+                          Presença confirmada
+                        </span>
+                      </div>
+                    )}
+
+                    {hasLate && (
+                      <div className="flex items-center gap-2 p-3 bg-orange-50 rounded-lg border border-orange-200">
+                        <CheckCircle2 className="h-5 w-5 text-orange-600" />
+                        <span className="text-sm text-orange-700 font-medium">
+                          Check-in realizado (atrasado)
+                        </span>
+                      </div>
+                    )}
+
+                    {hasExcused && (
+                      <div className="flex items-center gap-2 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                        <span className="text-sm text-yellow-700 font-medium">
+                          Ausência justificada
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Botão de Confirmar Presença (antecipadamente) */}
+                    {!hasCheckedIn && !hasExcused && !canCheckInNow && (
+                      <Button
+                        onClick={() => handleAttendanceUpdate(meeting.id, 'PRESENT')}
+                        disabled={actionLoading === meeting.id}
+                        className="w-full"
+                      >
+                        {actionLoading === meeting.id ? (
+                          'Processando...'
+                        ) : (
+                          <>
+                            <CheckCircle2 className="mr-2 h-4 w-4" />
+                            Confirmar Presença
+                          </>
+                        )}
+                      </Button>
+                    )}
+
+                    {/* Botão de Check-in (no horário) */}
+                    {!hasCheckedIn && !hasExcused && canCheckInNow && (
+                      <Button
+                        onClick={() => handleCheckIn(meeting.id, meetingDate)}
+                        disabled={actionLoading === meeting.id}
+                        className="w-full"
+                      >
+                        {actionLoading === meeting.id ? (
+                          'Processando...'
+                        ) : (
+                          <>
+                            <CheckCircle2 className="mr-2 h-4 w-4" />
+                            Fazer Check-in
+                          </>
+                        )}
+                      </Button>
+                    )}
+
+                    {/* Botão de Check-in (atrasado) */}
+                    {!hasCheckedIn && !hasExcused && isLate && !canCheckInNow && (
+                      <Button
+                        onClick={() => handleCheckIn(meeting.id, meetingDate)}
+                        disabled={actionLoading === meeting.id}
+                        variant="outline"
+                        className="w-full border-orange-300 text-orange-700 hover:bg-orange-50"
+                      >
+                        {actionLoading === meeting.id ? (
+                          'Processando...'
+                        ) : (
+                          <>
+                            <CheckCircle2 className="mr-2 h-4 w-4" />
+                            Fazer Check-in (Atrasado)
+                          </>
+                        )}
+                      </Button>
+                    )}
+
+                    {/* Reverter justificativa para Confirmar Presença */}
+                    {hasExcused && (
+                      <Button
+                        onClick={() => handleAttendanceUpdate(meeting.id, 'PRESENT')}
+                        disabled={actionLoading === meeting.id}
+                        variant="outline"
+                        className="w-full"
+                      >
+                        {actionLoading === meeting.id ? 'Processando...' : 'Confirmar Presença'}
+                      </Button>
+                    )}
+
+                    {/* Botão Justificar Ausência (sempre disponível se não justificou) */}
+                    {!hasExcused && (
+                      <Button
+                        onClick={() => handleAttendanceUpdate(meeting.id, 'EXCUSED')}
+                        disabled={actionLoading === meeting.id}
+                        variant="outline"
+                        className="w-full"
+                      >
+                        {actionLoading === meeting.id ? 'Processando...' : 'Justificar Ausência'}
+                      </Button>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
             )
