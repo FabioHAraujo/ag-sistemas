@@ -125,10 +125,11 @@ export default function MeetingsPage() {
         throw new Error('Erro ao atualizar presença')
       }
 
-      const messages = {
+      const messages: Record<string, string> = {
         PRESENT: 'Presença confirmada com sucesso!',
         EXCUSED: 'Ausência justificada com sucesso!',
         LATE: 'Check-in registrado (atrasado)',
+        ABSENT: 'Status atualizado',
       }
 
       toast.success(messages[status] || 'Presença atualizada!')

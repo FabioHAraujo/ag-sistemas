@@ -1,22 +1,11 @@
 'use client'
 
+import { AlertCircle, CheckCircle2, DollarSign, TrendingUp } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
-import { EmptyState } from '@/components/ui/empty-state'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { LoadingState } from '@/components/ui/loading-state'
 import {
   Select,
   SelectContent,
@@ -33,7 +22,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 
-interface Payment {
+type Payment = {
   id: string
   amount: number
   dueDate: string
@@ -48,135 +37,78 @@ interface Payment {
   membership: {
     id: string
     planType: string
-    status: string
   }
-}
-
-const statusColors = {
-  PENDING: 'bg-yellow-100 text-yellow-800',
-  PAID: 'bg-green-100 text-green-800',
-  OVERDUE: 'bg-red-100 text-red-800',
-  CANCELLED: 'bg-gray-100 text-gray-800',
-}
-
-const statusLabels = {
-  PENDING: 'Pendente',
-  PAID: 'Pago',
-  OVERDUE: 'Atrasado',
-  CANCELLED: 'Cancelado',
 }
 
 export default function AdminPaymentsPage() {
   const [payments, setPayments] = useState<Payment[]>([])
   const [loading, setLoading] = useState(true)
-  const [dialogOpen, setDialogOpen] = useState(false)
-  const [generateDialogOpen, setGenerateDialogOpen] = useState(false)
-  const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null)
-  const [actionLoading, setActionLoading] = useState(false)
-  const [filterStatus, setFilterStatus] = useState<string>('all')
-  const [generateMonth, setGenerateMonth] = useState<string>(
-    String(new Date().getMonth() + 1).padStart(2, '0')
-  )
-  const [generateYear, setGenerateYear] = useState<string>(String(new Date().getFullYear()))
-
-  const [paymentMethod, setPaymentMethod] = useState('')
+  const [statusFilter, setStatusFilter] = useState<string>('all')
 
   const fetchPayments = useCallback(async () => {
     try {
-      const url = filterStatus === 'all' ? '/api/payments' : `/api/payments?status=${filterStatus}`
+      const url = statusFilter === 'all' ? '/api/payments' : `/api/payments?status=${statusFilter}`
 
-      const response = await fetch(url, {
-        credentials: 'include',
-      })
-
-      if (!response.ok) {
-        throw new Error('Erro ao carregar pagamentos')
-      }
-
+      const response = await fetch(url)
+      if (!response.ok) throw new Error('Erro ao carregar pagamentos')
       const data = await response.json()
-      setPayments(Array.isArray(data) ? data : [])
+      setPayments(data)
     } catch (error) {
-      console.error('Error fetching payments:', error)
-      toast.error(error instanceof Error ? error.message : 'Erro ao carregar pagamentos')
-      setPayments([])
+      toast.error('Erro ao carregar pagamentos')
+      console.error(error)
     } finally {
       setLoading(false)
     }
-  }, [filterStatus])
+  }, [statusFilter])
 
   useEffect(() => {
     fetchPayments()
   }, [fetchPayments])
 
-  const handleMarkAsPaid = async (payment: Payment) => {
-    if (!paymentMethod && payment.status === 'PENDING') {
-      setSelectedPayment(payment)
-      setDialogOpen(true)
-      return
-    }
-
-    setActionLoading(true)
-
+  const handleUpdateStatus = async (paymentId: string, status: Payment['status']) => {
     try {
-      const response = await fetch(`/api/payments/${payment.id}`, {
+      const response = await fetch(`/api/payments/${paymentId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
         body: JSON.stringify({
-          status: 'PAID',
-          paidAt: new Date().toISOString(),
-          paymentMethod: paymentMethod || 'Não especificado',
+          status,
+          ...(status === 'PAID' && { paidAt: new Date().toISOString() }),
         }),
       })
 
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || 'Erro ao marcar pagamento como pago')
-      }
+      if (!response.ok) throw new Error('Erro ao atualizar status')
 
-      toast.success('Pagamento marcado como pago')
-      setDialogOpen(false)
-      setPaymentMethod('')
-      setSelectedPayment(null)
+      toast.success('Status atualizado com sucesso')
       fetchPayments()
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Erro ao atualizar pagamento')
-    } finally {
-      setActionLoading(false)
+      toast.error('Erro ao atualizar status do pagamento')
+      console.error(error)
     }
   }
 
-  const handleGenerateCharges = async () => {
-    setActionLoading(true)
-
-    try {
-      const response = await fetch('/api/payments/generate-charges', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          month: parseInt(generateMonth, 10),
-          year: parseInt(generateYear, 10),
-        }),
-      })
-
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || 'Erro ao gerar cobranças')
-      }
-
-      const data = await response.json()
-      toast.success(data.message)
-      setGenerateDialogOpen(false)
-      fetchPayments()
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Erro ao gerar cobranças')
-    } finally {
-      setActionLoading(false)
+  const getStatusBadge = (status: Payment['status']) => {
+    const variants = {
+      PENDING: { variant: 'secondary' as const, label: 'Pendente' },
+      PAID: { variant: 'default' as const, label: 'Pago' },
+      OVERDUE: { variant: 'destructive' as const, label: 'Vencido' },
+      CANCELLED: { variant: 'outline' as const, label: 'Cancelado' },
     }
+
+    const config = variants[status]
+
+    return <Badge variant={config.variant}>{config.label}</Badge>
   }
 
-  // Calcular estatísticas
+  const getPlanTypeLabel = (planType: string) => {
+    const labels: Record<string, string> = {
+      MONTHLY: 'Mensal',
+      QUARTERLY: 'Trimestral',
+      ANNUAL: 'Anual',
+    }
+    return labels[planType] || planType
+  }
+
+  // Cálculos de estatísticas
   const stats = {
     total: payments.reduce((sum, p) => sum + p.amount, 0),
     paid: payments.filter((p) => p.status === 'PAID').reduce((sum, p) => sum + p.amount, 0),
@@ -185,226 +117,187 @@ export default function AdminPaymentsPage() {
   }
 
   if (loading) {
-    return <LoadingState message="Carregando pagamentos..." />
+    return (
+      <div className="flex h-[400px] items-center justify-center">
+        <div className="text-muted-foreground">Carregando pagamentos...</div>
+      </div>
+    )
   }
 
   return (
-    <div className="container mx-auto py-10 space-y-6">
-      {/* Cards de Estatísticas */}
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold">Gestão de Pagamentos</h1>
+        <p className="text-muted-foreground">Acompanhe e gerencie todos os pagamentos do grupo</p>
+      </div>
+
+      {/* Estatísticas */}
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Total</CardDescription>
-            <CardTitle className="text-2xl">
-              R$ {stats.total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-            </CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Geral</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {stats.total.toLocaleString('pt-BR', {
+                style: 'currency',
+                currency: 'BRL',
+              })}
+            </div>
+            <p className="text-xs text-muted-foreground">{payments.length} pagamento(s)</p>
+          </CardContent>
         </Card>
+
         <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Pago</CardDescription>
-            <CardTitle className="text-2xl text-green-600">
-              R$ {stats.paid.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-            </CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Recebido</CardTitle>
+            <CheckCircle2 className="h-4 w-4 text-green-600" />
           </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-600">
+              {stats.paid.toLocaleString('pt-BR', {
+                style: 'currency',
+                currency: 'BRL',
+              })}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {payments.filter((p) => p.status === 'PAID').length} pago(s)
+            </p>
+          </CardContent>
         </Card>
+
         <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Pendente</CardDescription>
-            <CardTitle className="text-2xl text-yellow-600">
-              R$ {stats.pending.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-            </CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Pendente</CardTitle>
+            <TrendingUp className="h-4 w-4 text-yellow-600" />
           </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-yellow-600">
+              {stats.pending.toLocaleString('pt-BR', {
+                style: 'currency',
+                currency: 'BRL',
+              })}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {payments.filter((p) => p.status === 'PENDING').length} pendente(s)
+            </p>
+          </CardContent>
         </Card>
+
         <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Atrasado</CardDescription>
-            <CardTitle className="text-2xl text-red-600">
-              R$ {stats.overdue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-            </CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Vencido</CardTitle>
+            <AlertCircle className="h-4 w-4 text-red-600" />
           </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-red-600">
+              {stats.overdue.toLocaleString('pt-BR', {
+                style: 'currency',
+                currency: 'BRL',
+              })}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {payments.filter((p) => p.status === 'OVERDUE').length} vencido(s)
+            </p>
+          </CardContent>
         </Card>
       </div>
 
-      {/* Tabela de Pagamentos */}
+      {/* Filtros e Tabela */}
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0">
-          <div>
-            <CardTitle>Gestão de Pagamentos</CardTitle>
-            <CardDescription>Controle de mensalidades e pagamentos dos membros</CardDescription>
-          </div>
-          <div className="flex gap-2">
-            <Select value={filterStatus} onValueChange={setFilterStatus}>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Todos os Pagamentos</CardTitle>
+              <CardDescription>Lista completa de pagamentos do grupo</CardDescription>
+            </div>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-[180px]">
-                <SelectValue />
+                <SelectValue placeholder="Filtrar por status" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos</SelectItem>
                 <SelectItem value="PENDING">Pendentes</SelectItem>
                 <SelectItem value="PAID">Pagos</SelectItem>
-                <SelectItem value="OVERDUE">Atrasados</SelectItem>
+                <SelectItem value="OVERDUE">Vencidos</SelectItem>
+                <SelectItem value="CANCELLED">Cancelados</SelectItem>
               </SelectContent>
             </Select>
-            <Button onClick={() => setGenerateDialogOpen(true)}>Gerar Cobranças</Button>
           </div>
         </CardHeader>
         <CardContent>
           {payments.length === 0 ? (
-            <EmptyState
-              title="Nenhum pagamento encontrado"
-              description="Gere cobranças mensais ou ajuste os filtros"
-            />
+            <div className="flex h-[200px] items-center justify-center text-muted-foreground">
+              Nenhum pagamento encontrado
+            </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Membro</TableHead>
-                  <TableHead>Plano</TableHead>
-                  <TableHead>Valor</TableHead>
-                  <TableHead>Vencimento</TableHead>
-                  <TableHead>Pagamento</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Método</TableHead>
-                  <TableHead className="text-right">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {payments.map((payment) => (
-                  <TableRow key={payment.id}>
-                    <TableCell className="font-medium">{payment.member.name}</TableCell>
-                    <TableCell>{payment.membership.planType}</TableCell>
-                    <TableCell>
-                      R$ {payment.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                    </TableCell>
-                    <TableCell>{new Date(payment.dueDate).toLocaleDateString('pt-BR')}</TableCell>
-                    <TableCell>
-                      {payment.paidAt ? new Date(payment.paidAt).toLocaleDateString('pt-BR') : '-'}
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={statusColors[payment.status]}>
-                        {statusLabels[payment.status]}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{payment.paymentMethod || '-'}</TableCell>
-                    <TableCell className="text-right">
-                      {payment.status === 'PENDING' || payment.status === 'OVERDUE' ? (
-                        <Button
-                          size="sm"
-                          onClick={() => handleMarkAsPaid(payment)}
-                          disabled={actionLoading}
-                        >
-                          Marcar como Pago
-                        </Button>
-                      ) : null}
-                    </TableCell>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Membro</TableHead>
+                    <TableHead>Plano</TableHead>
+                    <TableHead>Valor</TableHead>
+                    <TableHead>Vencimento</TableHead>
+                    <TableHead>Pagamento</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Ações</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {payments.map((payment) => (
+                    <TableRow key={payment.id}>
+                      <TableCell>
+                        <div>
+                          <div className="font-medium">{payment.member.name}</div>
+                          <div className="text-sm text-muted-foreground">
+                            {payment.member.email}
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>{getPlanTypeLabel(payment.membership.planType)}</TableCell>
+                      <TableCell className="font-medium">
+                        {payment.amount.toLocaleString('pt-BR', {
+                          style: 'currency',
+                          currency: 'BRL',
+                        })}
+                      </TableCell>
+                      <TableCell>{new Date(payment.dueDate).toLocaleDateString('pt-BR')}</TableCell>
+                      <TableCell>
+                        {payment.paidAt ? (
+                          <div className="text-sm">
+                            {new Date(payment.paidAt).toLocaleDateString('pt-BR')}
+                            {payment.paymentMethod && (
+                              <div className="text-xs text-muted-foreground">
+                                {payment.paymentMethod}
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell>{getStatusBadge(payment.status)}</TableCell>
+                      <TableCell>
+                        {payment.status !== 'PAID' && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleUpdateStatus(payment.id, 'PAID')}
+                          >
+                            Marcar como Pago
+                          </Button>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           )}
         </CardContent>
       </Card>
-
-      {/* Dialog de Marcar como Pago */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Registrar Pagamento</DialogTitle>
-            <DialogDescription>
-              Confirme o pagamento de {selectedPayment?.member.name}
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label>Valor</Label>
-              <Input
-                value={`R$ ${selectedPayment?.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
-                disabled
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="paymentMethod">Método de Pagamento</Label>
-              <Select value={paymentMethod} onValueChange={setPaymentMethod}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o método" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="PIX">PIX</SelectItem>
-                  <SelectItem value="Transferência">Transferência Bancária</SelectItem>
-                  <SelectItem value="Boleto">Boleto</SelectItem>
-                  <SelectItem value="Cartão">Cartão de Crédito</SelectItem>
-                  <SelectItem value="Dinheiro">Dinheiro</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>
-              Cancelar
-            </Button>
-            <Button
-              onClick={() => selectedPayment && handleMarkAsPaid(selectedPayment)}
-              disabled={actionLoading || !paymentMethod}
-            >
-              {actionLoading ? 'Salvando...' : 'Confirmar Pagamento'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Dialog de Gerar Cobranças */}
-      <Dialog open={generateDialogOpen} onOpenChange={setGenerateDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Gerar Cobranças Mensais</DialogTitle>
-            <DialogDescription>
-              Gera automaticamente cobranças para todas as associações ativas
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="month">Mês</Label>
-                <Select value={generateMonth} onValueChange={setGenerateMonth}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => (
-                      <SelectItem key={month} value={String(month).padStart(2, '0')}>
-                        {new Date(2000, month - 1).toLocaleDateString('pt-BR', {
-                          month: 'long',
-                        })}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="year">Ano</Label>
-                <Input
-                  id="year"
-                  type="number"
-                  value={generateYear}
-                  onChange={(e) => setGenerateYear(e.target.value)}
-                />
-              </div>
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setGenerateDialogOpen(false)}>
-              Cancelar
-            </Button>
-            <Button onClick={handleGenerateCharges} disabled={actionLoading}>
-              {actionLoading ? 'Gerando...' : 'Gerar Cobranças'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }
