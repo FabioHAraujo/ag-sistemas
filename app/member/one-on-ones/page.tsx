@@ -36,17 +36,17 @@ import { Textarea } from '@/components/ui/textarea'
 
 interface OneOnOne {
   id: string
-  scheduledDate: string
+  meetingDate: string
   location: string
   notes?: string
   status: 'SCHEDULED' | 'COMPLETED' | 'CANCELLED'
   createdAt: string
-  requestedBy: {
+  memberOne: {
     id: string
     name: string
     email: string
   }
-  requestedWith: {
+  memberTwo: {
     id: string
     name: string
     email: string
@@ -61,8 +61,9 @@ interface Member {
 }
 
 interface OneOnOneFormData {
-  requestedWithId: string
-  scheduledDate: string
+  memberTwoId: string
+  meetingDate: string
+  meetingTime: string
   location: string
   notes: string
 }
@@ -88,8 +89,9 @@ export default function MemberOneOnOnesPage() {
   const [actionLoading, setActionLoading] = useState(false)
   const [currentUserId, setCurrentUserId] = useState<string>('')
   const [formData, setFormData] = useState<OneOnOneFormData>({
-    requestedWithId: '',
-    scheduledDate: '',
+    memberTwoId: '',
+    meetingDate: '',
+    meetingTime: '',
     location: '',
     notes: '',
   })
@@ -122,7 +124,7 @@ export default function MemberOneOnOnesPage() {
       }
 
       const data = await response.json()
-      setOneOnOnes(data.oneOnOnes)
+      setOneOnOnes(data.meetings || [])
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Erro ao carregar reuniões')
     } finally {
@@ -132,7 +134,7 @@ export default function MemberOneOnOnesPage() {
 
   const fetchMembers = useCallback(async () => {
     try {
-      const response = await fetch('/api/users', {
+      const response = await fetch('/api/members?status=active', {
         credentials: 'include',
       })
 
@@ -141,7 +143,7 @@ export default function MemberOneOnOnesPage() {
       }
 
       const data = await response.json()
-      setMembers(data.users.filter((u: Member) => u.role === 'MEMBER'))
+      setMembers(data.members || [])
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Erro ao carregar membros')
     }
@@ -156,17 +158,20 @@ export default function MemberOneOnOnesPage() {
   const handleOpenDialog = (oneOnOne?: OneOnOne) => {
     if (oneOnOne) {
       setSelectedOneOnOne(oneOnOne)
+      const meetingDateTime = new Date(oneOnOne.meetingDate)
       setFormData({
-        requestedWithId: oneOnOne.requestedWith.id,
-        scheduledDate: new Date(oneOnOne.scheduledDate).toISOString().slice(0, 16),
+        memberTwoId: oneOnOne.memberTwo.id,
+        meetingDate: meetingDateTime.toISOString().slice(0, 10),
+        meetingTime: meetingDateTime.toTimeString().slice(0, 5),
         location: oneOnOne.location,
         notes: oneOnOne.notes || '',
       })
     } else {
       setSelectedOneOnOne(null)
       setFormData({
-        requestedWithId: '',
-        scheduledDate: '',
+        memberTwoId: '',
+        meetingDate: '',
+        meetingTime: '',
         location: '',
         notes: '',
       })
@@ -178,8 +183,9 @@ export default function MemberOneOnOnesPage() {
     setDialogOpen(false)
     setSelectedOneOnOne(null)
     setFormData({
-      requestedWithId: '',
-      scheduledDate: '',
+      memberTwoId: '',
+      meetingDate: '',
+      meetingTime: '',
       location: '',
       notes: '',
     })
@@ -192,9 +198,13 @@ export default function MemberOneOnOnesPage() {
     try {
       const url = selectedOneOnOne ? `/api/one-on-ones/${selectedOneOnOne.id}` : '/api/one-on-ones'
 
+      const meetingDateTime = new Date(`${formData.meetingDate}T${formData.meetingTime}`)
+
       const payload = {
-        ...formData,
-        scheduledDate: new Date(formData.scheduledDate).toISOString(),
+        memberTwoId: formData.memberTwoId,
+        meetingDate: meetingDateTime.toISOString(),
+        location: formData.location,
+        notes: formData.notes,
       }
 
       const response = await fetch(url, {
@@ -247,11 +257,11 @@ export default function MemberOneOnOnesPage() {
   }
 
   const canEdit = (oneOnOne: OneOnOne) => {
-    return oneOnOne.requestedBy.id === currentUserId || oneOnOne.requestedWith.id === currentUserId
+    return oneOnOne.memberOne.id === currentUserId || oneOnOne.memberTwo.id === currentUserId
   }
 
   const canDelete = (oneOnOne: OneOnOne) => {
-    return oneOnOne.requestedBy.id === currentUserId
+    return oneOnOne.memberOne.id === currentUserId
   }
 
   if (loading) {
@@ -288,13 +298,13 @@ export default function MemberOneOnOnesPage() {
               </TableHeader>
               <TableBody>
                 {oneOnOnes.map((oneOnOne) => {
-                  const isRequestedBy = oneOnOne.requestedBy.id === currentUserId
-                  const otherPerson = isRequestedBy ? oneOnOne.requestedWith : oneOnOne.requestedBy
+                  const isMemberOne = oneOnOne.memberOne.id === currentUserId
+                  const otherPerson = isMemberOne ? oneOnOne.memberTwo : oneOnOne.memberOne
 
                   return (
                     <TableRow key={oneOnOne.id}>
                       <TableCell className="font-medium">
-                        {new Date(oneOnOne.scheduledDate).toLocaleString('pt-BR', {
+                        {new Date(oneOnOne.meetingDate).toLocaleString('pt-BR', {
                           dateStyle: 'short',
                           timeStyle: 'short',
                         })}
@@ -360,11 +370,11 @@ export default function MemberOneOnOnesPage() {
           <form onSubmit={handleSubmit}>
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
-                <Label htmlFor="requestedWithId">Reunião com</Label>
+                <Label htmlFor="memberTwoId">Reunião com</Label>
                 <Select
-                  value={formData.requestedWithId}
+                  value={formData.memberTwoId}
                   onValueChange={(value: string) =>
-                    setFormData({ ...formData, requestedWithId: value })
+                    setFormData({ ...formData, memberTwoId: value })
                   }
                   disabled={!!selectedOneOnOne}
                   required
@@ -384,15 +394,28 @@ export default function MemberOneOnOnesPage() {
                 </Select>
               </div>
 
-              <div className="grid gap-2">
-                <Label htmlFor="scheduledDate">Data e Hora</Label>
-                <Input
-                  id="scheduledDate"
-                  type="datetime-local"
-                  value={formData.scheduledDate}
-                  onChange={(e) => setFormData({ ...formData, scheduledDate: e.target.value })}
-                  required
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="meetingDate">Data</Label>
+                  <Input
+                    id="meetingDate"
+                    type="date"
+                    value={formData.meetingDate}
+                    onChange={(e) => setFormData({ ...formData, meetingDate: e.target.value })}
+                    required
+                  />
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="meetingTime">Hora</Label>
+                  <Input
+                    id="meetingTime"
+                    type="time"
+                    value={formData.meetingTime}
+                    onChange={(e) => setFormData({ ...formData, meetingTime: e.target.value })}
+                    required
+                  />
+                </div>
               </div>
 
               <div className="grid gap-2">
