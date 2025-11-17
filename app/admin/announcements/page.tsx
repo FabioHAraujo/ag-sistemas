@@ -38,8 +38,8 @@ interface Announcement {
   id: string
   title: string
   content: string
-  priority: 'LOW' | 'MEDIUM' | 'HIGH'
-  audience: 'ALL' | 'MEMBERS' | 'ADMINS'
+  priority: 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT'
+  targetAudience: 'ALL' | 'MEMBERS' | 'ADMINS'
   published: boolean
   createdAt: string
   updatedAt: string
@@ -53,21 +53,23 @@ interface Announcement {
 interface AnnouncementFormData {
   title: string
   content: string
-  priority: 'LOW' | 'MEDIUM' | 'HIGH'
-  audience: 'ALL' | 'MEMBERS' | 'ADMINS'
+  priority: 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT'
+  targetAudience: 'ALL' | 'MEMBERS' | 'ADMINS'
   published: boolean
 }
 
 const priorityColors = {
   LOW: 'bg-blue-100 text-blue-800',
-  MEDIUM: 'bg-yellow-100 text-yellow-800',
-  HIGH: 'bg-red-100 text-red-800',
+  NORMAL: 'bg-green-100 text-green-800',
+  HIGH: 'bg-yellow-100 text-yellow-800',
+  URGENT: 'bg-red-100 text-red-800',
 }
 
 const priorityLabels = {
   LOW: 'Baixa',
-  MEDIUM: 'Média',
+  NORMAL: 'Normal',
   HIGH: 'Alta',
+  URGENT: 'Urgente',
 }
 
 const audienceLabels = {
@@ -86,8 +88,8 @@ export default function AdminAnnouncementsPage() {
   const [formData, setFormData] = useState<AnnouncementFormData>({
     title: '',
     content: '',
-    priority: 'MEDIUM',
-    audience: 'ALL',
+    priority: 'NORMAL',
+    targetAudience: 'ALL',
     published: false,
   })
 
@@ -102,9 +104,12 @@ export default function AdminAnnouncementsPage() {
       }
 
       const data = await response.json()
-      setAnnouncements(data.announcements)
+      // A API retorna um array diretamente, não um objeto com announcements
+      setAnnouncements(Array.isArray(data) ? data : [])
     } catch (error) {
+      console.error('Error fetching announcements:', error)
       toast.error(error instanceof Error ? error.message : 'Erro ao carregar avisos')
+      setAnnouncements([])
     } finally {
       setLoading(false)
     }
@@ -121,7 +126,7 @@ export default function AdminAnnouncementsPage() {
         title: announcement.title,
         content: announcement.content,
         priority: announcement.priority,
-        audience: announcement.audience,
+        targetAudience: announcement.targetAudience,
         published: announcement.published,
       })
     } else {
@@ -129,8 +134,8 @@ export default function AdminAnnouncementsPage() {
       setFormData({
         title: '',
         content: '',
-        priority: 'MEDIUM',
-        audience: 'ALL',
+        priority: 'NORMAL',
+        targetAudience: 'ALL',
         published: false,
       })
     }
@@ -143,8 +148,8 @@ export default function AdminAnnouncementsPage() {
     setFormData({
       title: '',
       content: '',
-      priority: 'MEDIUM',
-      audience: 'ALL',
+      priority: 'NORMAL',
+      targetAudience: 'ALL',
       published: false,
     })
   }
@@ -278,7 +283,7 @@ export default function AdminAnnouncementsPage() {
                         {priorityLabels[announcement.priority]}
                       </Badge>
                     </TableCell>
-                    <TableCell>{audienceLabels[announcement.audience]}</TableCell>
+                    <TableCell>{audienceLabels[announcement.targetAudience]}</TableCell>
                     <TableCell>
                       <Badge variant={announcement.published ? 'default' : 'secondary'}>
                         {announcement.published ? 'Publicado' : 'Rascunho'}
@@ -363,7 +368,7 @@ export default function AdminAnnouncementsPage() {
                   <Label htmlFor="priority">Prioridade</Label>
                   <Select
                     value={formData.priority}
-                    onValueChange={(value: 'LOW' | 'MEDIUM' | 'HIGH') =>
+                    onValueChange={(value: 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT') =>
                       setFormData({ ...formData, priority: value })
                     }
                   >
@@ -372,18 +377,19 @@ export default function AdminAnnouncementsPage() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="LOW">Baixa</SelectItem>
-                      <SelectItem value="MEDIUM">Média</SelectItem>
+                      <SelectItem value="NORMAL">Normal</SelectItem>
                       <SelectItem value="HIGH">Alta</SelectItem>
+                      <SelectItem value="URGENT">Urgente</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div className="grid gap-2">
-                  <Label htmlFor="audience">Público</Label>
+                  <Label htmlFor="targetAudience">Público</Label>
                   <Select
-                    value={formData.audience}
+                    value={formData.targetAudience}
                     onValueChange={(value: 'ALL' | 'MEMBERS' | 'ADMINS') =>
-                      setFormData({ ...formData, audience: value })
+                      setFormData({ ...formData, targetAudience: value })
                     }
                   >
                     <SelectTrigger>
