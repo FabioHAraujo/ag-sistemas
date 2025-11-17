@@ -68,6 +68,8 @@ Grupos de networking tradicionalmente utilizam planilhas e controles manuais par
 - [x] Aprovação/rejeição com geração de tokens temporários
 - [x] Página de cadastro completo pós-aprovação
 - [x] Serviço de e-mail (console mock para desenvolvimento)
+- [x] Lista completa de membros com filtros e busca
+- [x] Perfis individuais com estatísticas de participação
 
 #### 📊 Dashboard
 - [x] Estatísticas gerais (membros, indicações, receitas)
@@ -85,15 +87,36 @@ Grupos de networking tradicionalmente utilizam planilhas e controles manuais par
 - [x] Error boundaries globais e por página
 - [x] Componentes acessíveis (Shadcn/ui)
 - [x] Design system completo
+- [x] Layout responsivo em todas as páginas
+- [x] Navegação intuitiva com sidebars
+
+#### 📅 Reuniões e Eventos
+- [x] Gestão de reuniões do grupo (admin)
+- [x] Tipos de reunião (REGULAR, SPECIAL, ONE_ON_ONE)
+- [x] Status de reunião (AGENDADA, EM ANDAMENTO, CONCLUÍDA, CANCELADA)
+- [x] Controle de presença em reuniões
+- [x] Reuniões 1-a-1 entre membros
+- [x] Agendamento de reuniões 1-a-1 (membros)
+- [x] Visualização de próximas reuniões
+- [x] Histórico de reuniões realizadas
+
+#### 📢 Comunicação
+- [x] Sistema de avisos e comunicados
+- [x] Níveis de prioridade (LOW, NORMAL, HIGH, URGENT)
+- [x] Público-alvo configurável (ALL, MEMBERS, ADMINS)
+- [x] Publicação e despublicação de avisos
+- [x] Data de expiração de avisos
+- [x] Gestão completa de avisos (admin)
+- [x] Visualização de avisos ativos (membros)
 
 ### 📅 Planejadas (Próximas fases)
 
 - Sistema de indicações de negócios (estrutura pronta no schema)
-- Controle de presença em reuniões
-- Módulo financeiro (mensalidades e pagamentos)
-- Comunicados e avisos
-- Reuniões 1-a-1 entre membros
-- Relatórios de performance
+- Sistema de agradecimentos públicos (Thank You cards)
+- Módulo financeiro completo (mensalidades e pagamentos)
+- Relatórios de performance detalhados
+- Sistema de notificações em tempo real
+- Dashboard personalizado por membro
 
 ---
 
@@ -253,18 +276,20 @@ pnpm test:coverage
 ### Status atual dos testes
 
 ```
-Test Suites: 17 passed, 17 total
-Tests:       2 skipped, 124 passed, 126 total
+Test Suites: 20 passed, 20 total
+Tests:       2 skipped, 154 passed, 156 total
 Snapshots:   0 total
-Time:        ~6s
+Time:        ~6-7s
 ```
 
-**Cobertura:** 126 testes implementados cobrindo:
-- ✅ Autenticação (JWT, passwords, login flow)
-- ✅ Componentes UI (buttons, forms, cards)
-- ✅ Páginas (login, apply, register, admin)
-- ✅ API Routes (auth, applications)
-- ✅ Validators (Zod schemas)
+**Cobertura:** 156 testes implementados cobrindo:
+- ✅ Autenticação (JWT, passwords, login/logout flow)
+- ✅ Componentes UI (buttons, forms, cards, tables)
+- ✅ Páginas (login, apply, register, admin applications)
+- ✅ API Routes (auth, applications, dashboard stats)
+- ✅ Validators (Zod schemas - 100% coverage)
+- ✅ Utils (password hashing - 100% coverage)
+- ✅ Fluxos E2E (admissão completa, autenticação)
 
 ---
 
@@ -323,6 +348,49 @@ ag-sistemas/
 | `POST` | `/api/auth/register` | Registro com token de convite | Não |
 | `GET` | `/api/auth/me` | Dados do usuário autenticado | Sim |
 | `POST` | `/api/auth/logout` | Logout (limpa cookie) | Sim |
+
+### Aplicações/Admissão
+
+| Método | Rota | Descrição | Autenticação |
+|--------|------|-----------|--------------|
+| `POST` | `/api/applications` | Criar intenção de participação | Não |
+| `GET` | `/api/applications` | Listar intenções (com filtros) | Admin |
+| `PATCH` | `/api/applications/:id/approve` | Aprovar candidatura | Admin |
+| `PATCH` | `/api/applications/:id/reject` | Rejeitar candidatura | Admin |
+
+### Reuniões
+
+| Método | Rota | Descrição | Autenticação |
+|--------|------|-----------|--------------|
+| `GET` | `/api/meetings` | Listar reuniões | Member |
+| `POST` | `/api/meetings` | Criar reunião | Admin |
+| `PATCH` | `/api/meetings/:id` | Atualizar reunião | Admin |
+| `DELETE` | `/api/meetings/:id` | Deletar reunião | Admin |
+| `POST` | `/api/meetings/:id/attendance` | Registrar presença | Member |
+
+### Avisos
+
+| Método | Rota | Descrição | Autenticação |
+|--------|------|-----------|--------------|
+| `GET` | `/api/announcements` | Listar avisos ativos | Member |
+| `POST` | `/api/announcements` | Criar aviso | Admin |
+| `PATCH` | `/api/announcements/:id` | Atualizar aviso | Admin |
+| `DELETE` | `/api/announcements/:id` | Deletar aviso | Admin |
+
+### Reuniões 1-a-1
+
+| Método | Rota | Descrição | Autenticação |
+|--------|------|-----------|--------------|
+| `GET` | `/api/one-on-ones` | Listar reuniões 1-a-1 | Member |
+| `POST` | `/api/one-on-ones` | Agendar reunião 1-a-1 | Member |
+| `PATCH` | `/api/one-on-ones/:id` | Atualizar reunião | Member (criador) |
+| `DELETE` | `/api/one-on-ones/:id` | Cancelar reunião | Member (criador) |
+
+### Dashboard
+
+| Método | Rota | Descrição | Autenticação |
+|--------|------|-----------|--------------|
+| `GET` | `/api/dashboard/stats` | Estatísticas gerais | Member |
 
 ### Exemplos de Requisições
 
@@ -410,16 +478,41 @@ O projeto utiliza Prisma ORM com os seguintes modelos principais:
 - [x] Tratamento de erros (error boundaries, API error handler)
 - [x] Loading states e empty states
 - [x] UX/UI polish (toast notifications, consistent loading)
-- [x] Testes de integração (124 testes passando)
+- [x] Testes de integração (156 testes passando)
 - [x] Documentação README e ARQUITETURA.md
+
+### ✅ Fase 6: Gestão de Membros (Completa)
+- [x] Lista de membros com filtros e busca
+- [x] Perfis individuais detalhados
+- [x] Estatísticas de participação
+- [x] Layout responsivo
+
+### ✅ Fase 7: Gestão de Reuniões (Completa)
+- [x] CRUD de reuniões do grupo (admin)
+- [x] Controle de presença em reuniões
+- [x] API `/api/meetings` e `/api/meetings/:id/attendance`
+- [x] Interface admin e member
+
+### ✅ Fase 8: Sistema de Avisos (Completa)
+- [x] CRUD de avisos/comunicados (admin)
+- [x] Níveis de prioridade e público-alvo
+- [x] Publicação e expiração de avisos
+- [x] API `/api/announcements`
+- [x] Visualização para membros
+
+### ✅ Fase 9: Reuniões 1-a-1 (Completa)
+- [x] Agendamento de reuniões entre membros
+- [x] Gestão admin de reuniões 1-a-1
+- [x] Interface member para criar/editar
+- [x] API `/api/one-on-ones`
+- [x] Status de reunião (agendada, concluída, cancelada)
 
 ### 📅 Próximas Funcionalidades
 - [ ] Implementar módulo de Referrals (indicações)
-- [ ] Sistema de Meetings (reuniões)
-- [ ] Módulo de Announcements (comunicados)
-- [ ] Financeiro (Memberships e Payments)
-- [ ] One-on-one Meetings
-- [ ] Thank You cards públicos
+- [ ] Sistema de Thank You cards
+- [ ] Módulo financeiro (Memberships e Payments)
+- [ ] Relatórios de performance
+- [ ] Notificações em tempo real
 
 ---
 
