@@ -17,6 +17,7 @@
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
     "db:seed": "tsx scripts/seed.ts",
+    "seed:memberships": "tsx scripts/seed-memberships.ts",
     "create-admin": "tsx scripts/create-admin.ts",
     "prepare": "husky"
   },
